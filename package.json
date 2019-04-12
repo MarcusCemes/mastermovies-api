@@ -1,0 +1,48 @@
+{
+  "name": "mastermovies-api",
+  "version": "0.0.1",
+  "description": "The MasterMovies Node.js API",
+  "main": "build/main/index.js",
+  "typings": "build/main/index.d.ts",
+  "module": "build/module/index.js",
+  "repository": "https://github.com/MarcusCemes/mastermovies-api",
+  "license": "UNLICENSED",
+  "private": true,
+  "keywords": [],
+  "scripts": {
+    "describe": "npm-scripts-info",
+    "build": "run-s clean && run-p build:*",
+    "build:main": "tsc -p tsconfig.json",
+    "build:module": "tsc -p tsconfig.module.json",
+    "fix": "run-s fix:*",
+    "fix:prettier": "prettier \"src/**/*.ts\" --write",
+    "fix:tslint": "tslint --fix --project .",
+    "test": "run-s build test:*",
+    "test:lint": "tslint --project . && prettier \"src/**/*.ts\" --list-different",
+    "test:unit": "echo \"No tests have been set up\"",
+    "watch": "run-s clean build:main && run-p \"build:main -- -w\" \"test:unit -- --watch\"",
+    "reset": "git clean -dfx && git reset --hard && npm i",
+    "clean": "trash build test"
+  },
+  "scripts-info": {
+    "info": "Display information about the package scripts",
+    "build": "Clean and rebuild the project",
+    "fix": "Try to automatically fix any linting problems",
+    "test": "Lint and unit test the project",
+    "watch": "Watch and rebuild the project on save, then rerun relevant tests",
+    "reset": "Delete all untracked files and reset the repo to the last commit"
+  },
+  "engines": {
+    "node": ">=8.9"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "npm-run-all": "^4.1.5",
+    "prettier": "^1.15.2",
+    "trash-cli": "^1.4.0",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.17.0",
+    "tslint-immutable": "^5.0.0",
+    "typescript": "^3.1.6"
+  }
+}
