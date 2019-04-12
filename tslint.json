@@ -24,11 +24,9 @@
     "no-this": true,
     "no-class": true,
     "no-mixed-interface": true,
-    "no-expression-statement": [
-      true,
-      { "ignore-prefix": ["console.", "process.exit", "app."] }
-    ],
-    "no-if-statement": true
+    "no-if-statement": true,
     /* end tslint-immutable rules */
+
+    "variable-name": false
   }
 }
