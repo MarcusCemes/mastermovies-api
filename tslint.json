@@ -12,19 +12,11 @@
     "no-parameter-reassignment": true,
     "typedef": [true, "call-signature"],
 
-    // Immutability rules
-    "readonly-keyword": true,
-    "readonly-array": true,
-    "no-let": true,
-    "no-object-mutation": true,
-    "no-delete": true,
-    "no-method-signature": true,
-
     // Functional style rules
     "no-this": true,
     "no-class": true,
     "no-mixed-interface": true,
-    "no-if-statement": true,
+    "no-if-statement": false,
     /* end tslint-immutable rules */
 
     "variable-name": false
