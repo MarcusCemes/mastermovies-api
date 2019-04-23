@@ -4,7 +4,7 @@ import { parse } from "path";
 import { Pool } from "pg";
 import { Readable, Writable } from "stream";
 
-import { warning } from "../common/logger";
+import { warn } from "../common/logger";
 import config from "../config/app.config";
 import { getFilm, getFilmAuthorization, getFilmDownloadInfo, getFilms, incrementViews } from "../models/films";
 import { getAuthHeader, jsonFetcher, jsonFetcherWithParameters, securePath } from "./common/helpers.js";
@@ -109,8 +109,8 @@ function attachViewIncrementor(res: Response, pool: Pool, fingerprint: string, t
   res.once("close", () => {
     if (transferredData > (threshold * fileSize)) {
       incrementViews(pool, fingerprint).catch((err) => {
-        warning("Failed to increment film views for " + fingerprint);
-        warning("Message: " + err.message);
+        warn("Failed to increment film views for " + fingerprint);
+        warn("Message: " + err.message);
       });
     } else {
     }

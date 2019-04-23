@@ -5,7 +5,8 @@ import { RateLimiterMemory } from "rate-limiter-flexible";
 import { promisify } from "util";
 
 import { createPool } from "./common/database";
-import { error, info, success, warning } from "./common/logger";
+import { error, info, ok, warn, wait } from "./common/logger";
+import { rateLimiter } from "./common/ratelimit";
 import config from "./config/app.config.js";
 import { createRoutes } from "./routes";
 import { statusResponse } from "./routes/common/standardResponses";
@@ -13,67 +14,57 @@ import { statusResponse } from "./routes/common/standardResponses";
 process.stdout.write("MasterMovies API\nAuthor: Marcus Cemes\nTimes are in UTC\n\n");
 
 if (process.env.NODE_ENV === "production") {
-  success("Running in production mode");
+  ok("Running in production mode");
 } else {
-  warning("Warning in development mode, unsuitable for production!");
+  warn("In development mode, unsuitable for production!");
 }
 
 (async () => {
   try {
     // Create the database pool
+    wait("Connecting to database...");
     const pool = await createPool();
-    success("Database connection pool ready");
 
     // Create the express application
+    wait("Creating Express.js application...");
     const app = express();
     const PORT = process.env.PORT || config.port;
 
     // Global rate limiting
-    const rateLimiter = new RateLimiterMemory({
+    wait("Initializing rate-limiter...");
+    app.use(rateLimiter(new RateLimiterMemory({
       points: 60,
       duration: 60
-    });
-    app.use((req: Request, res: Response, next: () => void) => {
-      rateLimiter.consume(req.ip)
-      .then(result => {
-        res.set({
-          "Retry-After": result.msBeforeNext / 1000,
-          "X-RateLimit-Limit": 60,
-          "X-RateLimit-Remaining": result.remainingPoints,
-          "X-RateLimit-Reset": Math.round((Date.now() + result.msBeforeNext)/1000)
-        });
-        next();
-      })
-      .catch(() => statusResponse(res, 429) );
-    });
+    })));
 
     // Secure headers
+    wait("Initializing secure headers...");
     app.use(helmet({
       dnsPrefetchControl: false,
       hsts: false
     }));
-    success("HTTP headers secured")
 
     // Create the express application routes
+    wait("Initializing router endpoints...");
     const routes = createRoutes(pool);
     app.use(routes);
-    success("Endpoint routers ready");
 
     // Register 404 handler
+    wait("Initializing error handlers...");
     app.use((_req: Request, res: Response, _next: () => void) => {
       statusResponse(res, 404);
     });
 
     // Register an error handler
     app.use((err: Error, req: Request, res: Response, _next: () => void) => {
-      warning("Uncaught error in route '" + req.originalUrl + "'");
-      warning("Message: " + err.message);
+      warn("Uncaught error in route '" + req.originalUrl + "'");
+      warn("Message: " + err.message);
       if (process.env.NODE_ENV === "production") {
         err.stack.split("\n")
           .filter(v => v.indexOf("mastermovies") !== -1 && v.indexOf("node_modules") === -1)
-          .forEach(v => warning(v));
+          .forEach(v => warn(v));
       } else {
-        warning(err.stack);
+        warn(err.stack);
       }
       statusResponse(res, 500);
     });
@@ -82,7 +73,7 @@ if (process.env.NODE_ENV === "production") {
     app.set("trust proxy", true);
     app.set("json spaces", 2);
     const server = app.listen(PORT, () => {
-      success(`Listening on http://127.0.0.1:${PORT}`);
+      ok(`Listening on http://127.0.0.1:${PORT}\n`);
     });
 
     // Attempt a graceful shutdown
@@ -97,7 +88,7 @@ if (process.env.NODE_ENV === "production") {
       info("Draining database connection pool");
       await pool.end();
 
-      success("Server stopped successfully", () => process.exit(0));
+      ok("Server stopped successfully", () => process.exit(0));
     };
 
     process.on("SIGTERM", shutdown);
