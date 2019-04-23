@@ -3,5 +3,7 @@ build
 test
 src/**.js
 .idea/*
+.env
+scripts/
 
 *.log
