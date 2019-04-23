@@ -1,6 +1,7 @@
 // Entry point, spin up the ExpressJS server
 import express, { Request, Response } from "express";
 import helmet from "helmet";
+import { RateLimiterMemory } from "rate-limiter-flexible";
 import { promisify } from "util";
 
 import { createPool } from "./common/database";
@@ -27,11 +28,31 @@ if (process.env.NODE_ENV === "production") {
     const app = express();
     const PORT = process.env.PORT || config.port;
 
+    // Global rate limiting
+    const rateLimiter = new RateLimiterMemory({
+      points: 60,
+      duration: 60
+    });
+    app.use((req: Request, res: Response, next: () => void) => {
+      rateLimiter.consume(req.ip)
+      .then(result => {
+        res.set({
+          "Retry-After": result.msBeforeNext / 1000,
+          "X-RateLimit-Limit": 60,
+          "X-RateLimit-Remaining": result.remainingPoints,
+          "X-RateLimit-Reset": Math.round((Date.now() + result.msBeforeNext)/1000)
+        });
+        next();
+      })
+      .catch(() => statusResponse(res, 429) );
+    });
+
     // Secure headers
     app.use(helmet({
       dnsPrefetchControl: false,
       hsts: false
     }));
+    success("HTTP headers secured")
 
     // Create the express application routes
     const routes = createRoutes(pool);
