@@ -2,20 +2,29 @@ import express, { Request, Response, Router } from "express";
 import { access, constants } from "fs";
 import { parse } from "path";
 import { Pool } from "pg";
+import { RateLimiterMemory } from "rate-limiter-flexible";
 import { Readable, Writable } from "stream";
 
 import { warn } from "../common/logger";
+import { rateLimiter } from "../common/ratelimit";
 import config from "../config/app.config";
 import { getFilm, getFilmAuthorization, getFilmDownloadInfo, getFilms, incrementViews } from "../models/films";
 import { getAuthHeader, jsonFetcher, jsonFetcherWithParameters, securePath } from "./common/helpers.js";
 import { statusResponse } from "./common/standardResponses";
 
+// Create authorization rate limiting
+const authRateLimiter = new RateLimiterMemory({
+  points: 10,
+  duration: 600
+});
+const limiter = rateLimiter(authRateLimiter);
+
 export function createFilmsRoute(pool: Pool): Router {
   return express.Router()
     .get("/", jsonFetcher(getFilms, pool))
     .get("/:fingerprint", jsonFetcherWithParameters(getFilm, pool))
-    .get("/:fingerprint/download/:export", downloadFilm(pool))
-    .get("/:fingerprint/stream/:export", downloadFilm(pool, true))
+    .get("/:fingerprint/download/:export", limiter, downloadFilm(pool))
+    .get("/:fingerprint/stream/:export", limiter, downloadFilm(pool, true))
 }
 
 
@@ -41,6 +50,7 @@ export function downloadFilm(pool: Pool, stream: boolean = false): (req: Request
         statusResponse(res, 401);
         return;
       }
+      authRateLimiter.reward(req.ip, 1);
 
       // Contain the path within the film_storage directory
       const { filename, name, release, filesize } = await getFilmDownloadInfo(req.params, pool);
