@@ -1,5 +1,6 @@
 // Entry point, spin up the ExpressJS server
 import express, { Request, Response } from "express";
+import helmet from "helmet";
 import { promisify } from "util";
 
 import { createPool } from "./common/database";
@@ -25,6 +26,12 @@ if (process.env.NODE_ENV === "production") {
     // Create the express application
     const app = express();
     const PORT = process.env.PORT || config.port;
+
+    // Secure headers
+    app.use(helmet({
+      dnsPrefetchControl: false,
+      hsts: false
+    }));
 
     // Create the express application routes
     const routes = createRoutes(pool);
