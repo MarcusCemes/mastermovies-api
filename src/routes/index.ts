@@ -21,6 +21,5 @@ export function createRoutes(pool: Pool): Router {
   return express.Router()
     .use("/auth", createAuthRoute(pool))
     .use("/films", createFilmsRoute(pool))
-    .get("/", (_req, res) => res.json(index));
+    .get("/", (_req, res) => { res.json(index) });
 }
-

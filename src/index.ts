@@ -1,11 +1,13 @@
 // Entry point, spin up the ExpressJS server
+import cookieParser from "cookie-parser";
 import express, { Request, Response } from "express";
 import helmet from "helmet";
 import { RateLimiterMemory } from "rate-limiter-flexible";
 import { promisify } from "util";
 
+import csurf from "csurf";
 import { createPool } from "./common/database";
-import { error, info, ok, warn, wait } from "./common/logger";
+import { error, info, ok, wait, warn } from "./common/logger";
 import { rateLimiter } from "./common/ratelimit";
 import config from "./config/app.config.js";
 import { createRoutes } from "./routes";
@@ -37,6 +39,19 @@ if (process.env.NODE_ENV === "production") {
       duration: 60
     })));
 
+    // Add CSRF protection
+    wait("Initializing CRSF protection...");
+    app.use(cookieParser());
+    app.use(csurf({ cookie: {
+      key: "CSRF-Secret",
+      secure: false, // TODO
+      httpOnly: true,
+    }}));
+    app.use((req: Request, res: Response, next: () => void) => {
+      res.cookie("CSRF-Token", req.csrfToken());
+      next();
+    });
+
     // Secure headers
     wait("Initializing secure headers...");
     app.use(helmet({
@@ -55,8 +70,14 @@ if (process.env.NODE_ENV === "production") {
       statusResponse(res, 404);
     });
 
+    // Register CSRF error handler
+    app.use((err: any, _req: Request, res: Response, next: (err?: any) => void) => {
+      if (err.code !== "EBADCSRFTOKEN") { next(err); return; }
+      statusResponse(res, 403); // Forbidden
+    });
+
     // Register an error handler
-    app.use((err: Error, req: Request, res: Response, _next: () => void) => {
+    app.use((err: any, req: Request, res: Response, _next: (err?: any) => void) => {
       warn("Uncaught error in route '" + req.originalUrl + "'");
       warn("Message: " + err.message);
       if (process.env.NODE_ENV === "production") {
@@ -80,12 +101,10 @@ if (process.env.NODE_ENV === "production") {
     let shutdown: () => void;
     shutdown = async () => {
       shutdown = () => {/* */};
-      info("Graceful shutdown initiated")
-
-      info("Waiting for all connections to close");
+      info("Waiting for server connections to close...");
       await promisify(server.close);
 
-      info("Draining database connection pool");
+      info("Draining database connection pool...");
       await pool.end();
 
       ok("Server stopped successfully", () => process.exit(0));
