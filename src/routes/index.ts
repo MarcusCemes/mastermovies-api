@@ -1,15 +1,14 @@
 import express, { Router } from "express";
-import { Pool } from "pg";
 
 import config from "../config/app.config.js";
-import { createAuthRoute } from "./auth.js";
-import { createFilmsRoute } from "./films.js";
+import auth from "./auth.js";
+import films from "./films.js";
 
 /**
  * Generates the application routes
  * @param {Pool} pool The database connection pool
  */
-export function createRoutes(pool: Pool): Router {
+export default function create(): Router {
 
   // Generate the index
   const index = {
@@ -19,7 +18,7 @@ export function createRoutes(pool: Pool): Router {
 
   // Build the router
   return express.Router()
-    .use("/auth", createAuthRoute(pool))
-    .use("/films", createFilmsRoute(pool))
+    .use("/auth", auth())
+    .use("/films", films())
     .get("/", (_req, res) => { res.json(index) });
 }

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { RateLimiterAbstract, RateLimiterRes } from "rate-limiter-flexible";
 
-import { statusResponse } from "../routes/common/standardResponses";
+import { statusResponse } from "../routes/common/response";
 
 /**
  * Middleware: hit the rate-limiter, setting correct headers, returning boolean of a successful hit
@@ -14,7 +14,7 @@ export function rateLimiter(limiter: RateLimiterAbstract) {
       next();
     } catch (err) {
       setRateHeaders(res, err);
-      statusResponse(res, 429);
+      statusResponse(res, 429, "You have reached your API quota!");
     }
   };
 }

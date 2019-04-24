@@ -6,25 +6,25 @@ import { RateLimiterMemory } from "rate-limiter-flexible";
 import { Readable, Writable } from "stream";
 
 import { warn } from "../common/logger";
-import { rateLimiter } from "../common/ratelimit";
+import { rateLimiter } from "../common/rateLimitMiddleware";
 import config from "../config/app.config";
 import { getFilm, getFilmAuthorization, getFilmDownloadInfo, getFilms, incrementViews } from "../models/films";
-import { getAuthHeader, jsonFetcher, jsonFetcherWithParameters, securePath } from "./common/helpers.js";
-import { statusResponse } from "./common/standardResponses";
+import { dataFetcher, getAuthHeader, securePath } from "./common/helpers.js";
+import { statusResponse } from "./common/response";
 
 // Create authorization rate limiting
 const authRateLimiter = new RateLimiterMemory({
   points: 10,
   duration: 600
 });
-const limiter = rateLimiter(authRateLimiter);
+const authLimiter = rateLimiter(authRateLimiter);
 
-export function createFilmsRoute(pool: Pool): Router {
+export default function create(): Router {
   return express.Router()
-    .get("/", jsonFetcher(getFilms, pool))
-    .get("/:fingerprint", jsonFetcherWithParameters(getFilm, pool))
-    .get("/:fingerprint/download/:export", limiter, downloadFilm(pool))
-    .get("/:fingerprint/stream/:export", limiter, downloadFilm(pool, true))
+    .get("/", dataFetcher(getFilms))
+    .get("/:fingerprint", dataFetcher(getFilm))
+    .get("/:fingerprint/download/:export", authLimiter, downloadFilm(false))
+    .get("/:fingerprint/stream/:export", authLimiter, downloadFilm(true));
 }
 
 
@@ -35,7 +35,7 @@ export function createFilmsRoute(pool: Pool): Router {
  * incrementing the view counter after a certain amount of data
  * has been transmitted
  */
-export function downloadFilm(pool: Pool, stream: boolean = false): (req: Request, res: Response, next: (err?: Error) => void) => Promise<void> {
+export function downloadFilm(stream: boolean = false): (req: Request, res: Response, next: (err?: Error) => void) => Promise<void> {
   return async (req: Request, res: Response, next: (err?: any) => void): Promise<void> => {
     try {
       if (!req.params.fingerprint || !req.params.export) {
@@ -45,15 +45,20 @@ export function downloadFilm(pool: Pool, stream: boolean = false): (req: Request
 
       // Verify access authorization
       const token = getAuthHeader(req) || "";
-      const authorized = await getFilmAuthorization(pool, req.params.fingerprint, token);
+      const authorized = await getFilmAuthorization(req.app.db, req.params.fingerprint, token);
       if (!authorized) {
-        statusResponse(res, 401);
+        statusResponse(res, 401, "This is a protected resource"); // Unauthorized
         return;
       }
       authRateLimiter.reward(req.ip, 1);
 
       // Contain the path within the film_storage directory
-      const { filename, name, release, filesize } = await getFilmDownloadInfo(req.params, pool);
+      const filmDownloadInfo = await getFilmDownloadInfo(req.app.db, req.params);
+      if (!filmDownloadInfo) {
+        next(new Error("Could not obtain film download information"));
+        return;
+      }
+      const { filename, name, release, filesize } = filmDownloadInfo;
       const filePath = securePath(config.film_storage, filename);
 
       if (!filePath) {
@@ -71,7 +76,7 @@ export function downloadFilm(pool: Pool, stream: boolean = false): (req: Request
         } else {
 
           try {
-            attachViewIncrementor(res, pool, req.params.fingerprint, config.view_threshold, filesize);
+            attachViewIncrementor(res, req.app.db, req.params.fingerprint, config.view_threshold, filesize);
             if (stream) {
               res.sendFile(filePath);
             } else {
@@ -126,3 +131,6 @@ function attachViewIncrementor(res: Response, pool: Pool, fingerprint: string, t
     }
   });
 }
+
+
+

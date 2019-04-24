@@ -112,7 +112,7 @@ SET views = films.views.views + 1;`;
 
 
 /** Get all list of published films with minimal information */
-export async function getFilms(pool: Pool): Promise<IFilmSummary[]> {
+export async function getFilms(pool: Pool, _params: any): Promise<IFilmSummary[]> {
   const { rows } = await pool.query(LIST_FILMS_QUERY);
   for (const row of rows) {
     row.film_url = config.base + "films/" + row.fingerprint;
@@ -121,7 +121,7 @@ export async function getFilms(pool: Pool): Promise<IFilmSummary[]> {
 }
 
 /** Get a single film with more detailed information */
-export async function getFilm(params: any, pool: Pool): Promise<IFilm> {
+export async function getFilm(pool: Pool, params: any): Promise<IFilm> {
   if (!isValidHex(params.fingerprint)) {
     return void 0;
   }
@@ -137,7 +137,7 @@ export async function getFilm(params: any, pool: Pool): Promise<IFilm> {
   return void 0;
 }
 
-export async function getFilmDownloadInfo(params: any, pool: Pool):
+export async function getFilmDownloadInfo(pool: Pool, params: any):
 Promise<{ filename: string, name: string, release: Date, filesize: number }> {
   if (!isValidHex(params.fingerprint) || !isValidHex(params.export)) {
     return void 0;

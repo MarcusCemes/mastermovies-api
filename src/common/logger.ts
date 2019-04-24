@@ -71,6 +71,6 @@ function _overwrite(stream: NodeJS.WriteStream): void {
 
 function _log(msg: string, status: string, colour: string, stream: NodeJS.WriteStream, callback?: (err?: Error) => void): void {
   _overwrite(stream);
-  const indentedMsg = msg.replace("\n", "\n" + " ".repeat(19));
+  const indentedMsg = msg.replace("\n", "\n" + " ".repeat(20));
   stream.write(`${time()} ${colour}${center(status, 8)}${RESET} ${indentedMsg}\n`, callback);
 }

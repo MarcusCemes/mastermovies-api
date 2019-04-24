@@ -1,63 +1,29 @@
 import { Request, Response } from "express";
 import { isAbsolute, join, normalize, relative, resolve } from "path";
-
-/**
- * Higher order factory function for a Node.js JSON Request/Response handler.
- * But with actual Typescript generic typings!
- *
- * This abstracts away the HTTP logic, allowing simple stateless function
- * calling to resolve JSON data (REST API).
- *
- * Takes a variable function F as the first parameter, and all of the F's
- * parameters (let's call them P) as the remaining parameters. Returns a
- * function H that accepts a HTTP Request, Response and next callback.
- *
- * The returned function H will call F along with the provided parameters P,
- * resolve the returned promise if necessary, resolving the HTTP Response
- * with the data returned from F as a JSON payload.
- *
- * If an error occurs, the next callback will be called with the error,
- * allowing capture by error middleware.
- * @param {Function} fctn A sync/async function that returns an object
- * @param {...*} args The arguments to call _fctn_ with
- * @returns {Function} A function that acts as an Express.js middleware
- * @example
- * router.get("/", jsonFetcher(databaseFunction, databaseConnection));
- * // is similar to doing...
- * router.get("/", (req, res, next) => {
- *   try { res.json(await databaseFunction(databaseConnection)) } catch (err) { next(err); }
- * })
- */
-export function jsonFetcher<F extends (...args: any[]) => any>(fctn: F, ...args: Parameters<F>):
-(req: Request, res: Response, next: (err?: Error) => void) => void {
-  return async (_req: Request, res: Response, next: (err?: Error) => void): Promise<void> => {
-    try {
-      const result = await fctn(...args);
-      if (result) {
-        res.json(result);
-      } else {
-        next();
-      }
-    } catch (err) {
-      next(err);
-    }
-  };
-}
+import { Pool } from "pg";
 
 type RemoveFirstFromTuple<T extends any[]> =
   T['length'] extends 0 ? undefined :
   (((...b: T) => void) extends (a, ...b: infer I) => void ? I : [])
 
+type RemoveFirstTwoFromTuple<T extends any[]> =
+  RemoveFirstFromTuple<RemoveFirstFromTuple<T>>;
+
 /**
- * Similar to jsonFetcher, but also passes the request parameters as the first
- * parameter to the F function.
- * @see jsonFetcher
+ * Factory function for a route handler. Fetch data from a function,
+ * catching errors (respond 500), testing for non-truthy value
+ * (respond 404) while providing the database pool, and route
+ * parameters and pass-through any parameters given to
+ * the factory function.
+ *
+ * Let's you remove HTTP logic from your data fetching function,
+ * creating a clean database retrieval function that can throw.
  */
-export function jsonFetcherWithParameters<F extends (parameters: any, ...args: any[]) => any>(fctn: F, ...args: RemoveFirstFromTuple<Parameters<F>>):
+export function dataFetcher<F extends (pool: Pool, parameters: any, ...args: any[]) => any>(fctn: F, ...args: RemoveFirstTwoFromTuple<Parameters<F>>):
 (req: Request, res: Response, next: (err?: Error) => void) => void {
   return async (req: Request, res: Response, next: (err?: Error) => void): Promise<void> => {
     try {
-      const result = await fctn(req.params, ...args);
+      const result = await fctn(req.app.db, req.params, ...args);
       if (result) {
         res.json(result);
       } else {
