@@ -5,7 +5,6 @@ import { statusResponse } from "../routes/common/response";
 
 /** 404, CSRF and general error handling */
 export default function initialize(app: Application) {
-
   // Respond to 404 not found errors
   app.use(
     (_req: Request, res: Response, _next: () => void): void => {
@@ -15,7 +14,6 @@ export default function initialize(app: Application) {
   );
 
   app.use((err: any, req: Request, res: Response, _next: () => void) => {
-
     // Respond to CSRF rejection
     if (err.code === "EBADCSRFTOKEN") {
       statusResponse(res, 403, "Bad CSRF token"); // Forbidden

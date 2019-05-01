@@ -1,8 +1,7 @@
+import cookieParser from "cookie-parser";
 import { Application } from "express";
 
-import routes from "../routes";
-
-/** Attach endpoints as a single router */
+/** Parse app cookies */
 export default function initialize(app: Application) {
-  app.use(routes());
+  app.use(cookieParser());
 }

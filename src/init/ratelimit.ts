@@ -1,14 +1,13 @@
 import { Application } from "express";
 import { RateLimiterMemory } from "rate-limiter-flexible";
 
-import { rateLimiter } from "../common/rateLimitMiddleware";
+import { limit } from "../common/middleware/rateLimiter";
 
-/** Protect against HTTP Parameter Pollution */
+/** Protect against DDOS attacks */
 export default function initialize(app: Application): void {
-
   // Add the rate limiter middleware
   app.use(
-    rateLimiter(
+    limit(
       new RateLimiterMemory({
         duration: 60,
         points: 60

@@ -6,7 +6,6 @@ import { error } from "../common/logger";
 
 /** Create a database connection pool */
 export default async function initialize(app: Application): Promise<void> {
-
   const pool = new Pool().on("error", err => {
     error("Database: Unexpected error on idle client (pool)", () => {
       throw err;
@@ -17,7 +16,6 @@ export default async function initialize(app: Application): Promise<void> {
 
   // Attach the database to the app
   app.db = pool;
-
 }
 
 /** Test the database connection */
