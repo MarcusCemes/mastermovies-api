@@ -1,15 +1,18 @@
-interface Config {
+import { verifyConfig } from "./util";
+
+export interface IAppConfig {
   base: string;
+  domain: string
   port: number;
-  film_storage: string;
-  view_threshold: number;
+  title: string; // Response title/name
 }
 
-const config: Config = {
-  "base": "https://api.mastermovies.co.uk/",
-  "port": 3000,
-  "film_storage": process.env.FILM_STORAGE || "/opt/glacier/",
-  "view_threshold": 0.2 // percentage of total film size
-};
-
-export default config;
+export const AppConfig: IAppConfig = verifyConfig(
+  {
+    base: process.env.BASE || "https://api.mastermovies.co.uk/",
+    domain: "mastermovies.co.uk",
+    port: parseInt(process.env.PORT, 10) || 3000,
+    title: "MasterMovies REST v2"
+  },
+  ["base", "domain", "port", "title"]
+);

@@ -1,14 +1,15 @@
 const isTTY = process.stdout.isTTY && process.stderr.isTTY;
 
-const [ERROR, SUCCESS, INFO, WARN, WAIT, GREY, RESET] = [
+const [ERROR, SUCCESS, INFO, WARN, WAIT, DONE, GREY, RESET] = [
   "41;97",
   "32",
   "94",
   "103;30",
   "36",
+  "30;42",
   "90",
   "0"
-].map(i => isTTY ? "\u001b[" + i + "m" : "");
+].map(i => (isTTY ? "\u001b[" + i + "m" : ""));
 
 function pad(number: number, digits: number = 2): string {
   const stringNumber = number.toString();
@@ -62,6 +63,10 @@ export function wait(msg: string, callback?: (err?: Error) => any): void {
   shouldOverwrite = true;
 }
 
+export function done(msg: string, callback?: (err?: Error) => any): void {
+  _log(msg, "DONE", DONE, process.stdout, callback);
+}
+
 function _overwrite(stream: NodeJS.WriteStream): void {
   if (stream.isTTY && shouldOverwrite === true) {
     stream.write("\x1b[A\x1b[K");
@@ -69,8 +74,17 @@ function _overwrite(stream: NodeJS.WriteStream): void {
   }
 }
 
-function _log(msg: string, status: string, colour: string, stream: NodeJS.WriteStream, callback?: (err?: Error) => void): void {
+function _log(
+  msg: string,
+  status: string,
+  colour: string,
+  stream: NodeJS.WriteStream,
+  callback?: (err?: Error) => void
+): void {
   _overwrite(stream);
   const indentedMsg = msg.replace("\n", "\n" + " ".repeat(20));
-  stream.write(`${time()} ${colour}${center(status, 8)}${RESET} ${indentedMsg}\n`, callback);
+  stream.write(
+    `${time()} ${colour}${center(status, 8)}${RESET} ${indentedMsg}\n`,
+    callback
+  );
 }

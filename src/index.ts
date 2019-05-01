@@ -1,10 +1,9 @@
 // Entry point, spin up the ExpressJS server
 import express, { Application } from "express";
 import { Server } from "http";
-import { Pool } from "pg";
 
-import { error, info, ok, wait, warn } from "./common/logger";
-import config from "./config/app.config.js";
+import { done, error, ok, wait, warn } from "./common/logger";
+import { AppConfig } from "./config";
 import initialize from "./init";
 
 process.stdout.write(
@@ -21,7 +20,7 @@ if (process.env.NODE_ENV === "production") {
   // Create the express application
   wait("Creating Express.js application...");
   const app = express();
-  const PORT = process.env.PORT || config.port;
+  const PORT = AppConfig.port;
 
   // Initialize application with middleware
   await initialize(app);
@@ -30,7 +29,7 @@ if (process.env.NODE_ENV === "production") {
   let server: Server;
   try {
     server = app.listen(PORT, () => {
-      ok(`Listening on http://127.0.0.1:${PORT}\n`);
+      done(`Listening on http://127.0.0.1:${PORT}\n`);
     });
   } catch (err) {
     error("An error occurred during startup:");
@@ -44,18 +43,14 @@ if (process.env.NODE_ENV === "production") {
   process.on("SIGINT", shutdownHandler);
 })();
 
-
 function shutdown(server: Server, app: Application): () => any {
   return async function _shutdown(): Promise<void> {
     process.removeListener("SIGTERM", _shutdown);
     process.removeListener("SIGINT", _shutdown);
 
-    info("Waiting for server connections to close...");
-    await new Promise(res => server.close(() => res()));
-
-    info("Draining database connection pool...");
-    await (app.db as Pool).end();
-
-    ok("Server stopped successfully", () => process.exit(0));
+    // Just try and close as quickly and gracefully as possible
+    server.close();
+    app.db.end();
+    process.exit(0);
   };
 }
