@@ -1,7 +1,7 @@
 {
   "extends": ["tslint:latest", "tslint-config-prettier"],
   "rules": {
-    "interface-name": [true, "never-prefix"],
+    "interface-name": true,
     // TODO: allow devDependencies only in **/*.spec.ts files:
     // waiting on https://github.com/palantir/tslint/pull/3708
     "no-implicit-dependencies": [true, "dev"],
@@ -10,16 +10,11 @@
     // Recommended built-in rules
     "no-var-keyword": true,
     "no-parameter-reassignment": true,
-    "typedef": [true, "call-signature"],
 
-    // Functional style rules
-    "no-this": true,
-    "no-class": true,
-    "no-mixed-interface": true,
-    "no-if-statement": false,
     /* end tslint-immutable rules */
 
     "variable-name": false,
-    "curly": false
+    "curly": false,
+    "object-literal-sort-keys": false
   }
 }
