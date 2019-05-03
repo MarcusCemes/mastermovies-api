@@ -14,11 +14,6 @@ export default function initialize(app: Application) {
   );
 
   app.use((err: any, req: Request, res: Response, _next: () => void) => {
-    // Respond to CSRF rejection
-    if (err.code === "EBADCSRFTOKEN") {
-      statusResponse(res, 403, "Bad CSRF token"); // Forbidden
-      return;
-    }
 
     // Respond to general errors
     warn("Uncaught error in route '" + req.originalUrl + "'");
