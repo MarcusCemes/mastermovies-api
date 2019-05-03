@@ -1,5 +1,6 @@
 import express, { Router } from "express";
 
+import { cors } from "../common/middleware/cors";
 import { AppConfig } from "../config";
 import { AuthRouter } from "./auth";
 import { GlacierRouter } from "./glacier";
@@ -19,7 +20,7 @@ export default function create(): Router {
   // Build the router
   return express
     .Router()
-    .get("/", (_req, res) => { res.json(index); })
+    .all("/", cors(), (_req, res) => { res.json(index); })
     .use("/auth", AuthRouter())
     .use("/glacier", GlacierRouter());
 }

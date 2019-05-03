@@ -7,7 +7,7 @@ import { AppConfig } from "./config";
 import initialize from "./init";
 
 process.stdout.write(
-  "MasterMovies API\nAuthor: Marcus Cemes\nTimes are in UTC\n\n"
+  AppConfig.title + "\nAuthor: Marcus Cemes\nTimes are in UTC\n\n"
 );
 
 if (process.env.NODE_ENV === "production") {

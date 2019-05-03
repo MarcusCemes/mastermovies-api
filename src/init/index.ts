@@ -22,12 +22,12 @@ const ENABLED_MODULES: Array<[(app: Application) => void, string]> = [
   [csrf, "Cross Site Request Forgery"],
   [helmet, "Secure HTTP Response Headers"],
   [jwt, "JSON Web Token Authentication"],
-  [routes, "Endpoints Routing"],
+  [routes, "Endpoint Routing"],
   [errorHandlers, "Error Handling"]
 ];
 
 export default async function initialize(app: Application): Promise<void> {
-  noStatus("Injecting modules...");
+  noStatus("Injecting middleware...");
 
   // Attach each module to the app
   for (let i = 0; i < ENABLED_MODULES.length; i++) {
@@ -49,7 +49,7 @@ export default async function initialize(app: Application): Promise<void> {
   app.set("trust proxy", true);
   app.set("json spaces", 2);
 
-  ok("All modules active");
+  noStatus("All middleware active\n");
 
   return;
 }

@@ -1,5 +1,6 @@
 import express, { Router } from "express";
 
+import { cors } from "../../common/middleware/cors";
 import { AppConfig, GlacierConfig } from "../../config";
 import { getFilm, getFilms } from "../../models/glacier";
 import { dataFetcher } from "../common/helpers.js";
@@ -25,9 +26,9 @@ export function GlacierRouter(): Router {
 
   return express
     .Router()
-    .get("/", (_req, res) => { res.json(index); })
-    .get("/list", dataFetcher(getFilms, AppConfig.base))
-    .get("/film/:film", dataFetcher(getFilm, AppConfig.base))
-    .get("/film/:film/export/:export", downloadFilm)
-    .get("/film/:film/thumbnail/:thumbnail", downloadThumbnail);
+    .all("/", cors(), (_req, res) => { res.json(index); })
+    .all("/list", cors(), dataFetcher(getFilms, AppConfig.base))
+    .all("/film/:film", cors(), dataFetcher(getFilm, AppConfig.base))
+    .all("/film/:film/export/:export", cors(), downloadFilm)
+    .all("/film/:film/thumbnail/:thumbnail", cors(), downloadThumbnail);
 }
