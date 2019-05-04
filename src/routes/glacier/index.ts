@@ -1,4 +1,4 @@
-import express, { Router } from "express";
+import express, { Request, Response, Router } from "express";
 
 import { cors } from "../../common/middleware/cors";
 import { AppConfig, GlacierConfig } from "../../config";
@@ -15,22 +15,24 @@ export function GlacierRouter(): Router {
     return serviceUnavailable();
   }
 
-
-  // Generate the index
-  const index = {
-    _message: AppConfig.title + " - Glacier Endpoint",
-    list_url: AppConfig.base + "glacier/list{?public}",
-    film_url: AppConfig.base + "glacier/film/{film}",
-    export_url: AppConfig.base + "glacier/film/{film}/export/{export}{?download}",
-    thumbnail_url: AppConfig.base + "glacier/film/{film}/thumbnail/{thumbnail}",
-  };
-
-
   return express
     .Router()
-    .all("/", cors(), (_req, res) => { res.json(index); })
+    .all("/", cors(), index)
     .all("/list", cors(), dataFetcher(getFilms, AppConfig.base))
     .all("/film/:film", cors(), dataFetcher(getFilm, AppConfig.base))
     .all("/film/:film/export/:export", cors(), downloadFilm)
     .all("/film/:film/thumbnail/:thumbnail", cors(), downloadThumbnail);
+}
+
+function index(req: Request, res: Response, _next: (err?: Error) => void): void {
+
+  const base = AppConfig.base + req.originalUrl + "/";
+  res.status(200).json({
+    _message: AppConfig.title + " - Glacier Endpoint",
+    list_url: base + "list{?public}",
+    film_url: base + "film/{film}",
+    export_url: base + "film/{film}/export/{export}{?download}",
+    thumbnail_url: base + "film/{film}/thumbnail/{thumbnail}",
+  });
+
 }

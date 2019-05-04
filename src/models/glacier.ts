@@ -156,6 +156,7 @@ export async function getFilm(
       exports: [],
       thumbnails: []
     };
+    const path = req.originalUrl;
     for (const exp of exportsResult.rows) {
       result.exports.push({
         fingerprint: exp.fingerprint,
@@ -166,18 +167,8 @@ export async function getFilm(
         video_codec: exp.video_codec,
         audio_codec: exp.audio_codec,
         stream_optimized: exp.stream_optimized,
-        download_url:
-          base +
-          "glacier/film/" +
-          req.params.film +
-          "/export/" +
-          exp.fingerprint + "?download",
-        stream_url:
-          base +
-          "glacier/film/" +
-          req.params.film +
-          "/export/" +
-          exp.fingerprint
+        download_url: base + path + `/export/${exp.fingerprint}?download`,
+        stream_url: base + path + `/export/${exp.fingerprint}`
       });
     }
     for (const thumb of thumbnailResult.rows) {
@@ -186,12 +177,7 @@ export async function getFilm(
         width: thumb.width,
         height: thumb.height,
         mime: thumb.mime,
-        image_url:
-          base +
-          "glacier/film/" +
-          req.params.film +
-          "/thumbnail/" +
-          thumb.fingerprint
+        image_url: base + path + `/thumbnail/${thumb.fingerprint}`
       });
     }
     return result;

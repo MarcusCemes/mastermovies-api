@@ -1,8 +1,14 @@
-import { Application } from "express";
+import { Application, Request, Response } from "express";
+import express = require("express");
 
-import routes from "../routes";
+import { ApplicationRouter } from "../routes";
 
-/** Attach endpoints as a single router */
+/** Redirect to the latest version and attach routers */
 export default function initialize(app: Application) {
-  app.use(routes());
+
+  const rootRouter =express.Router()
+    .all("/", (_req: Request, res: Response, _next: (err?: Error) => void) => { res.redirect("/v2") })
+    .use("/v2", ApplicationRouter());
+
+    app.use(rootRouter);
 }

@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://api.mastermovies.co.uk",
+      "url": "https://api.mastermovies.co.uk/v2",
       "description": "Production"
     }
   ],

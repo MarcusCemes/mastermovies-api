@@ -10,7 +10,7 @@ export interface IAppConfig {
 
 export const AppConfig: IAppConfig = verifyConfig(
   {
-    base: process.env.BASE || "https://api.mastermovies.co.uk/",
+    base: process.env.BASE || "https://api.mastermovies.co.uk",
     domain: "mastermovies.co.uk",
     port: parseInt(process.env.PORT, 10) || 3000,
     title: "MasterMovies API [REST] v2",
