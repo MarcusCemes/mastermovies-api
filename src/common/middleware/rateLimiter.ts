@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { RateLimiterAbstract, RateLimiterRes } from "rate-limiter-flexible";
 
-import { statusResponse } from "../../routes/common/response";
+import { statusResponse } from "../../routes/common/statusResponse";
 
 /**
  * Middleware: hit the rate-limiter, setting correct headers, returning boolean of a successful hit

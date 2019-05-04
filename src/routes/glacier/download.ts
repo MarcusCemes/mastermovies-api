@@ -7,7 +7,7 @@ import { hit, limit } from "../../common/middleware/rateLimiter";
 import { GlacierConfig } from "../../config";
 import { getFilmDownloadInfo, IFilmDownloadInfo } from "../../models/glacier";
 import { securePath } from "../common/helpers.js";
-import { statusResponse } from "../common/response";
+import { statusResponse } from "../common/statusResponse";
 import { isValidHex } from "../common/util";
 import { attachViewIncrementor } from "./views";
 
@@ -42,11 +42,11 @@ export async function downloadFilm(req: Request, res: Response, next: (err?: any
     const grant = await hit(_authLimiter, req.ip, res);
     if (typeof grant === "function") {
 
-      const user = await req.user;
-      const validAuthorization = filmDownloadInfo.restricted === false || user.glacier
-        && user.glacier.authorizations
-        && user.glacier.authorizations[req.params.film]
-        && user.glacier.authorizations[req.params.film] >= Math.round(Date.now()/1000); // to seconds
+      const token = (await req.user).data;
+      const validAuthorization = filmDownloadInfo.restricted === false || token.glacier
+        && token.glacier.authorizations
+        && token.glacier.authorizations[req.params.film]
+        && token.glacier.authorizations[req.params.film] >= Math.round(Date.now()/1000); // to seconds
         if (validAuthorization === true) {
           grant();
           startDownload(filmDownloadInfo, req, res, next);

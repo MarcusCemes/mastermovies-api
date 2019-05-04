@@ -3,6 +3,7 @@ import express, { Router } from "express";
 import { cors } from "../common/middleware/cors";
 import { AppConfig } from "../config";
 import { AuthRouter } from "./auth";
+import { DocsRouter } from "./docs";
 import { GlacierRouter } from "./glacier";
 
 /**
@@ -13,7 +14,9 @@ export default function create(): Router {
   // Generate the index
   const index = {
     _message: AppConfig.title,
+    _documentation: "https://mastermovies.co.uk/docs",
     auth_url: AppConfig.base + "auth",
+    docs_url: AppConfig.base + "docs",
     glacier_url: AppConfig.base + "glacier"
   };
 
@@ -22,5 +25,6 @@ export default function create(): Router {
     .Router()
     .all("/", cors(), (_req, res) => { res.json(index); })
     .use("/auth", AuthRouter())
+    .use("/docs", DocsRouter())
     .use("/glacier", GlacierRouter());
 }

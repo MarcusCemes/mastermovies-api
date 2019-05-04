@@ -1,6 +1,6 @@
 import express, { Request, Response, Router } from "express";
 
-import { statusResponse } from "./response";
+import { statusResponse } from "./statusResponse";
 
 let router: Router;
 

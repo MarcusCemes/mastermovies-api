@@ -1,0 +1,146 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "MasterMovies API",
+    "description": "This is the documentation for the MasterMovies API, used by the MasterMovies website to interact with dynamic content",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://api.mastermovies.co.uk",
+      "description": "Main production API"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authorization Endpoint",
+      "description": "Provides cryptographically signed authorization for restricted resources"
+    },
+    {
+      "name": "Glacier Endpoint",
+      "description": "Access to MasterMovies Films"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "JWT": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "MasterMoviesID"
+      }
+    },
+    "schemas": {
+      "StandardResponse": {
+        "type": "object",
+        "description": "A standard HTTP status code response",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "code"
+        ]
+      },
+      "AuthorizationRequest": {
+        "type": "object",
+        "required": [
+          "type",
+          "resource",
+          "key"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "film"
+            ]
+          },
+          "resource": {
+            "type": "string",
+            "format": "hex"
+          },
+          "key": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth": {
+      "post": {
+        "tags": [
+          "Authorization Endpoint"
+        ],
+        "summary": "Endpoint listing",
+        "description": "Provides hard URLs that are available under the endpoint",
+        "operationId": "authorize",
+        "requestBody": {
+          "description": "A JSON object containing the requested resource and a key",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authorizarion granted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "headers": {
+              "Set-Cookie": {
+                "description": "Sets the signed MasterMovies ID token",
+                "schema": {
+                  "type": "string",
+                  "example": "MasterMoviesID=eyJhbG...OGOFt8; Path=/; HttpOnly; Secure; Expires=1556755200"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed authorization request or unknown resource type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Credentials rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    }
+  }
+}

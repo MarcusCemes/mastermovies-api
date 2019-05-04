@@ -4,8 +4,8 @@ import { RateLimiterMemory } from "rate-limiter-flexible";
 import { hit } from "../../common/middleware/rateLimiter";
 import { AuthConfig } from "../../config";
 import { checkFilmAuthorization } from "../../models/auth";
-import { ResolvedJWT } from "../../types/express";
-import { statusResponse } from "../common/response";
+import { IJwtPayload } from "../../types/express";
+import { statusResponse } from "../common/statusResponse";
 
 // Create authentication rate limiting
 export const authLimiter = new RateLimiterMemory({
@@ -39,23 +39,23 @@ export async function authorizeFilm(req: Request, res: Response, next: (err?: Er
     return;
   }
 
-  const grant = await hit(authLimiter, req.ip, res);
-  if (typeof grant !== "function") return;
+  const reward = await hit(authLimiter, req.ip, res);
+  if (typeof reward !== "function") return;
 
   try {
 
     const authorized = await checkFilmAuthorization(req.app.db, resource, key);
-    if (authorized === undefined) {
-      next();
-      grant();
+    if (typeof authorized === "undefined") {
+      next(); // film does not exist => 404 Not Found
+      reward();
       return;
 
     } else if (authorized === true) {
       const user = await req.user;
-      const newToken = await addAuthorization(resource, user);
+      const newToken = await addAuthorization(resource, user.data);
       await user.update(newToken);
-      statusResponse(res, 200, "Authorization granted");
-      grant();
+      res.status(200).json(newToken); // print back the new authorization
+      reward();
       return;
 
     } else {
@@ -70,9 +70,9 @@ export async function authorizeFilm(req: Request, res: Response, next: (err?: Er
 }
 
 /** Add the new film authorization */
-async function addAuthorization(film: string, oldToken: ResolvedJWT): Promise<ResolvedJWT> {
+async function addAuthorization(film: string, oldToken: IJwtPayload): Promise<IJwtPayload> {
 
-  const newToken: ResolvedJWT = { ...oldToken };
+  const newToken: IJwtPayload = { ...oldToken };
   newToken.glacier = newToken.glacier || {};
   newToken.glacier.authorizations = newToken.glacier.authorizations || {};
   newToken.glacier.authorizations[film] = Math.round(Date.now() / 1000) + AuthConfig.auth_jwt_lifetime;

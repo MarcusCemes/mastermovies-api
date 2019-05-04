@@ -2,21 +2,21 @@ import { Response } from "express";
 import { STATUS_CODES } from "http";
 
 interface IStatusResponse {
-  status: number;
-  code: string;
+  code: number;
+  status: string;
   message?: string;
 }
 
 /** Respond with a standard status code + JSON message */
 export function statusResponse(
   res: Response,
-  status: number,
+  code: number,
   message?: string
 ): void {
   const response: IStatusResponse = {
-    status,
-    code: STATUS_CODES[status],
+    code,
+    status: STATUS_CODES[code],
     message
   };
-  res.status(status).json(response);
+  res.status(code).json(response);
 }

@@ -1,7 +1,7 @@
 import { Application, Request, Response } from "express";
 
 import { warn } from "../common/logger";
-import { statusResponse } from "../routes/common/response";
+import { statusResponse } from "../routes/common/statusResponse";
 
 /** 404, CSRF and general error handling */
 export default function initialize(app: Application) {

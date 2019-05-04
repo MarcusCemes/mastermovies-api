@@ -4,7 +4,7 @@
 // and reused
 import { Handler, Request, Response } from "express";
 
-import { statusResponse } from "../../routes/common/response";
+import { statusResponse } from "../../routes/common/statusResponse";
 import { cacheRetrieve, cacheStore } from "../cache";
 
 const allowedOrigin = /^(?:[\.\-\_a-zA-Z0-9]*\.)?mastermovies\.co\.uk$/;
@@ -56,7 +56,10 @@ function parseConfig(config: ICorsConfig): IParsedConfig {
   if (methods.indexOf("HEAD") === -1) methods.push("HEAD");
   methods = methods.sort();
 
-  const headers = parseConfigKey(config.headers).sort();
+  let headers = parseConfigKey(config.headers);
+  if (headers.indexOf("Content-Type") === -1) headers.push("Content-Type");
+  headers = headers.sort();
+
   const expose = parseConfigKey(config.expose).sort();
   const restrictOrigin = config.restrictOrigin === true;
   const credentials = config.credentials === true;
@@ -79,43 +82,39 @@ function parseConfigKey(item: string | string[]): string[] {
 function createCorsHandler(config: IParsedConfig): Handler {
   return (req: Request, res: Response, next: (err?: Error) => void) => {
 
-    // Reflect allowed-origin header if it's allowed
+    // Reflect the origin header based on endpoint origin restrictions
     const origin = req.get("Origin");
-    let validOrigin = false;
-    if (typeof origin === "string") {
-      validOrigin = allowedOrigin.test(origin);
-    }
-    res.header("Access-Control-Allowed-Origin", validOrigin ? origin : defaultOrigin);
-
-    // Block restricted endpoints
-    if (config.restrictOrigin && !validOrigin) {
-      statusResponse(res, 403, "Blocked by CORS policy for this endpoint");
-      return;
-    }
+    const isSecureOrigin = typeof origin === "string" && allowedOrigin.test(origin);
+    const secureOrigin = isSecureOrigin ? origin : defaultOrigin;
+    res.header("Access-Control-Allow-Origin", config.restrictOrigin ? secureOrigin : origin || defaultOrigin);
 
     // Block methods that aren't allowed
     if (config.methods.indexOf(req.method) === -1) {
-      res.header("Access-Control-Allowed-Methods", config.methods.join(","));
-      res.header("Access-Control-Allowed-Headers", config.headers.join(","));
+      res.header("Access-Control-Allow-Methods", config.methods.join(","));
+      res.header("Access-Control-Allow-Headers", config.headers.join(","));
       res.header("Access-Control-Expose-Headers", config.expose.join(","));
       res.header("Access-Control-Allow-Credentials", config.credentials.toString());
-      statusResponse(res, 405, "Blocked by CORS policy for this endpoint");
+      statusResponse(res, 405);  // Method Not Allowed
+      return;
     }
 
-    // Respond to OPTIONS/HEAD (preflight request)
-    if (req.method === "OPTIONS") {
-      res.header("Access-Control-Allowed-Methods", config.methods.join(","));
-      res.header("Access-Control-Allowed-Headers", config.headers.join(","));
+    // Respond to OPTIONS/HEAD (pre-flight request)
+    if (req.method === "OPTIONS" || req.method === "HEAD") {
+      res.header("Access-Control-Allow-Methods", config.methods.join(","));
+      res.header("Access-Control-Allow-Headers", config.headers.join(","));
       res.header("Access-Control-Expose-Headers", config.expose.join(","));
       res.header("Access-Control-Allow-Credentials", config.credentials.toString());
-      statusResponse(res, 204);
+      statusResponse(res, 204);  // No Content
       return;
-    } else if (req.method === "HEAD") {
-      res.end();
-      return;
-    } else {
-      next();
     }
+
+    // Deny restricted requests
+    if (config.restrictOrigin === true && isSecureOrigin !== true) {
+      statusResponse(res, 403, "Origin blocked by endpoint CORS policy");  // Forbidden
+      return;
+    }
+
+    next();
 
   };
 }

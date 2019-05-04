@@ -1,9 +1,13 @@
 import { Pool } from "pg";
 
-export interface ResolvedJWT {
+export interface IRequestUser {
   error?: string;
+  data: IJwtPayload;
+  update: (token: IJwtPayload) => Promise<boolean>;
+}
+
+export interface IJwtPayload {
   glacier?: { authorizations?: { [index: string]: number } };
-  update?: (token: ResolvedJWT) => Promise<boolean>;
 }
 
 declare global {
@@ -13,7 +17,7 @@ declare global {
     }
 
     interface Request {
-      user?: Promise<ResolvedJWT>;
+      user?: Promise<IRequestUser>;
     }
   }
 }
