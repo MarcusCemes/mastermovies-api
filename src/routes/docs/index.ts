@@ -4,7 +4,7 @@ import { cors } from "../../common/middleware/cors";
 import api from "./openapi.json";
 
 /** Provides API documentation */
-export function DocsRouter(): Router {
+export function OpenApiRouter(): Router {
 
   return express
     .Router()

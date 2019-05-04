@@ -2,7 +2,7 @@ import { Application } from "express";
 
 import { error, noStatus, ok, wait } from "../common/logger";
 import bodyParser from "./bodyParser";
-import cookies from "./cookies";
+import cookies from "./cookieParser";
 import csrf from "./csrf";
 import database from "./database";
 import errorHandlers from "./errorHandlers";

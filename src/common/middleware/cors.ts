@@ -7,7 +7,7 @@ import { Handler, Request, Response } from "express";
 import { statusResponse } from "../../routes/common/statusResponse";
 import { cacheRetrieve, cacheStore } from "../cache";
 
-const allowedOrigin = /^(?:[\.\-\_a-zA-Z0-9]*\.)?mastermovies\.co\.uk$/;
+const allowedOrigin = /^http[s]?:\/\/(?:[\.\-\_a-zA-Z0-9]*\.)?mastermovies\.co\.uk$/;
 const defaultOrigin = "https://mastermovies.co.uk";
 
 const CACHE_SCOPE = "cors";

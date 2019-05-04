@@ -21,6 +21,8 @@ export function GlacierRouter(): Router {
     _message: AppConfig.title + " - Glacier Endpoint",
     list_url: AppConfig.base + "glacier/list{?public}",
     film_url: AppConfig.base + "glacier/film/{film}",
+    export_url: AppConfig.base + "glacier/film/{film}/export/{export}{?download}",
+    thumbnail_url: AppConfig.base + "glacier/film/{film}/thumbnail/{thumbnail}",
   };
 
 

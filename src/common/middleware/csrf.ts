@@ -5,6 +5,7 @@ import { Request, Response } from "express";
 
 import { AppConfig } from "../../config";
 import { statusResponse } from "../../routes/common/statusResponse";
+import { decrypt, encrypt } from "../encryption";
 
 const csrfLib = new _csrf();
 
@@ -34,12 +35,17 @@ export async function csrf(req: Request, res: Response, next: (err?: Error) => v
 
 }
 
-/** Retrieve the CSRF token/secret pair from the Request cookies */
+/** Retrieve and decrypt the CSRF token/secret pair from the Request cookies */
 export function getCsrfPair(req: Request): { token?: string, secret?: string } {
 
-  const secret = req.cookies[csrfCookieSecret];
-  const token = req.cookies[csrfCookieToken];
-  return { token, secret };
+  try {
+    const [ iv, encryptedSecret ] = req.cookies[csrfCookieSecret].split(".");
+    const secret = decrypt(encryptedSecret, iv);
+    const token = req.cookies[csrfCookieToken];
+    return { token, secret };
+  } catch (err) {
+    return {};
+  }
 
 }
 
@@ -47,18 +53,21 @@ export function getCsrfHeader(req: Request): string {
   return req.get(csrfHeader);
 }
 
-/** Generate a new CSRF token/secret pair and set them as cookies */
+/** Generate and encrypt a new CSRF token/secret pair and set them as cookies */
 export async function generateNewTokens(res: Response) {
 
   const secret = await csrfLib.secret();
   const token  = csrfLib.create(secret);
 
-  res.cookie(csrfCookieSecret, secret, {
+  const { iv, data } = encrypt(secret);
+  const encryptedSecret = iv + "." + data;
+
+  res.cookie(csrfCookieSecret, encryptedSecret, {
     expires: false,
     domain: AppConfig.domain,
     path: "/",
     httpOnly: true,
-    secure: true
+    secure: true,
   });
 
   res.cookie(csrfCookieToken, token, {
