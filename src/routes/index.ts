@@ -1,4 +1,5 @@
 import express, { Request, Response, Router } from "express";
+import { posix } from "path";
 
 import { cors } from "../common/middleware/cors";
 import { AppConfig } from "../config";
@@ -29,13 +30,13 @@ export function ApplicationRouter(): Router {
 
 function index(req: Request, res: Response, _next: (err?: Error) => void): void {
 
-  const base = AppConfig.base + req.originalUrl + "/";
+  const base = AppConfig.base;
   res.status(200).json({
     _message: AppConfig.title,
-    auth_url: base + "auth",
+    auth_url: base + posix.normalize(`${req.originalUrl}/auth`),
     docs_url: "https://mastermovies.co.uk/docs",
-    glacier_url: base + "glacier",
-    openapi_url: base + "openapi.json"
+    glacier_url: base + posix.normalize(`${req.originalUrl}/glacier`),
+    openapi_url: base + posix.normalize(`${req.originalUrl}/openapi.json`)
   });
 
 }

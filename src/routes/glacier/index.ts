@@ -1,4 +1,5 @@
 import express, { Request, Response, Router } from "express";
+import { posix } from "path";
 
 import { cors } from "../../common/middleware/cors";
 import { AppConfig, GlacierConfig } from "../../config";
@@ -26,13 +27,13 @@ export function GlacierRouter(): Router {
 
 function index(req: Request, res: Response, _next: (err?: Error) => void): void {
 
-  const base = AppConfig.base + req.originalUrl + "/";
+  const base = AppConfig.base;
   res.status(200).json({
     _message: AppConfig.title + " - Glacier Endpoint",
-    list_url: base + "list{?public}",
-    film_url: base + "film/{film}",
-    export_url: base + "film/{film}/export/{export}{?download}",
-    thumbnail_url: base + "film/{film}/thumbnail/{thumbnail}",
+    list_url: base + posix.normalize(`${req.originalUrl}/list{?public}`),
+    film_url: base + posix.normalize(`${req.originalUrl}/film/{film}`),
+    export_url: base + posix.normalize(`${req.originalUrl}/film/{film}/export/{export}?download`),
+    thumbnail_url: base + posix.normalize(`${req.originalUrl}/film/{film}/thumbnail/{thumbnail}`)
   });
 
 }

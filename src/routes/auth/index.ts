@@ -1,5 +1,6 @@
 // MasterMovies API - Authorization Endpoint
 import express, { Request, Response, Router } from "express";
+import { posix } from "path";
 
 import { cors } from "../../common/middleware/cors";
 import { csrf } from "../../common/middleware/csrf";
@@ -25,11 +26,11 @@ export function AuthRouter(): Router {
 
 function index(req: Request, res: Response, _next: (err?: Error) => void): void {
 
-  const base = AppConfig.base + req.originalUrl + "/";
+  const base = AppConfig.base;
   res.status(200).json({
     _message: AppConfig.title + " - Authorization Endpoint",
-    authorize_url: base + "authorize",
-    query_url: base + "query"
+    authorize_url: base + posix.normalize(`${req.originalUrl}/authorize`),
+    query_url: base + posix.normalize(`${req.originalUrl}/query`)
   });
 
 }

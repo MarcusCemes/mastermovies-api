@@ -1,4 +1,4 @@
-import { createCipher, createCipheriv, createDecipheriv, randomBytes } from "crypto";
+import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
 import { AppConfig } from "../config";
 
@@ -7,9 +7,9 @@ const IV_LENGTH = 16;
 
 // Try the algorithm and key
 try {
-  const key = Buffer.from(AppConfig.encryption_key, "hex");
+  const key = AppConfig.encryption_key;
   const iv = randomBytes(IV_LENGTH);
-  const cipher = createCipher(ALGORITHM, key, iv);
+  const cipher = createCipheriv(ALGORITHM, key, iv);
   const text = "Cipher is working!";
 
   cipher.update(text, "utf8");
@@ -21,7 +21,7 @@ try {
 /** Encrypts a utf8 string into a base64 data+iv */
 export function encrypt(data: string): { data: string, iv: string } {
 
-  const key = Buffer.from(AppConfig.encryption_key, "hex");
+  const key = AppConfig.encryption_key;
   const iv = randomBytes(IV_LENGTH);
   const cipher = createCipheriv(ALGORITHM, key, iv);
 
@@ -36,7 +36,7 @@ export function encrypt(data: string): { data: string, iv: string } {
 /** Decrypts base64 data+iv into a utf8 string */
 export function decrypt(data: string, iv: string): string {
 
-  const key = Buffer.from(AppConfig.encryption_key, "hex");
+  const key = AppConfig.encryption_key;
   const decipher = createDecipheriv(ALGORITHM, key, Buffer.from(iv, "base64"));
 
   let result = decipher.update(data, "base64", "utf8");

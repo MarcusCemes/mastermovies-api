@@ -1,4 +1,5 @@
 import { Request } from "express";
+import { posix } from "path";
 import { Pool } from "pg";
 
 import { isValidHex } from "../routes/common/util";
@@ -129,7 +130,8 @@ export async function getFilms(
     FILM_LIST_QUERY(req.query.public !== undefined)
   );
   for (const row of rows) {
-    row.film_url = base + "glacier/film/" + row.fingerprint;
+    // row.film_url = base + "glacier/film/" + row.fingerprint;
+    row.film_url = base + posix.normalize(`${req.originalUrl}/../film/${row.fingerprint}`)
   }
   return rows;
 }
@@ -156,7 +158,6 @@ export async function getFilm(
       exports: [],
       thumbnails: []
     };
-    const path = req.originalUrl;
     for (const exp of exportsResult.rows) {
       result.exports.push({
         fingerprint: exp.fingerprint,
@@ -167,8 +168,8 @@ export async function getFilm(
         video_codec: exp.video_codec,
         audio_codec: exp.audio_codec,
         stream_optimized: exp.stream_optimized,
-        download_url: base + path + `/export/${exp.fingerprint}?download`,
-        stream_url: base + path + `/export/${exp.fingerprint}`
+        download_url: base + posix.resolve(`${req.originalUrl}/export/${exp.fingerprint}?download`),
+        stream_url: base + posix.resolve(`${req.originalUrl}/export/${exp.fingerprint}`),
       });
     }
     for (const thumb of thumbnailResult.rows) {
@@ -177,7 +178,7 @@ export async function getFilm(
         width: thumb.width,
         height: thumb.height,
         mime: thumb.mime,
-        image_url: base + path + `/thumbnail/${thumb.fingerprint}`
+        image_url: base + posix.resolve(`${req.originalUrl}/thumbnail/${thumb.fingerprint}`)
       });
     }
     return result;

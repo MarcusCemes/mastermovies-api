@@ -44,19 +44,6 @@ export function dataFetcher<
   };
 }
 
-/** Retrieves the token after "bearer" from the authorization header */
-export function getAuthHeader(req: Request): string {
-  const auth = (req.headers || {}).authorization;
-  if (auth) {
-    const parts = auth.split(" ");
-    if (parts.length > 1 && parts[0].trim().toLowerCase() === "bearer") {
-      parts.shift(); // Remove the bearer prefix
-      return parts.join(" ");
-    }
-  }
-  return null;
-}
-
 /**
  * Safely join several paths, verifying that the final path is inside
  * the first path (first argument). Returns false if it's a dangerous
