@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { access, constants } from "fs";
 
+import { cacheHeaders } from "../../common/cacheHeaders";
 import { GlacierConfig } from "../../config";
 import { getFilmThumbnail } from "../../models/glacier";
 import { securePath } from "../common/helpers.js";
@@ -23,6 +24,7 @@ export async function downloadThumbnail(req: Request, res: Response, next: (err?
     }
     // Check if it exists on disk
     access(filePath, constants.F_OK, err => {
+      cacheHeaders(res, 3600); // Allow caching for one hour
       if (err) {
         next(new Error(`Could not locate thumbnail for film ${req.params.film}: ${filePath}`));
         return;
