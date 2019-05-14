@@ -34,7 +34,7 @@ function index(req: Request, res: Response, _next: (err?: Error) => void): void 
   res.status(200).json({
     _message: AppConfig.title,
     auth_url: base + posix.normalize(`${req.originalUrl}/auth`),
-    docs_url: "https://mastermovies.co.uk/docs",
+    docs_url: "https://mastermovies.uk/docs",
     glacier_url: base + posix.normalize(`${req.originalUrl}/glacier`),
     openapi_url: base + posix.normalize(`${req.originalUrl}/openapi.json`)
   });

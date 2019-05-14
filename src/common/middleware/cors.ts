@@ -8,7 +8,7 @@ import { statusResponse } from "../../routes/common/statusResponse";
 import { cacheRetrieve, cacheStore } from "../cache";
 
 const allowedOrigin = /^http[s]?:\/\/(?:[\.\-\_a-zA-Z0-9]*\.)?mastermovies\.co\.uk$/;
-const defaultOrigin = "https://mastermovies.co.uk";
+const defaultOrigin = "https://mastermovies.uk";
 
 const CACHE_SCOPE = "cors";
 

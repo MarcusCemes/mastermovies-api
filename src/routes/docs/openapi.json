@@ -2,12 +2,12 @@
   "openapi": "3.0.0",
   "info": {
     "title": "MasterMovies API [REST]",
-    "description": "Welcome to the documentation for [MasterMovies API](https://api.mastermovies.co.uk), compliant with [OpenAPI v3](https://swagger.io/specification/). This document describes how clients should interact with the API, such as the request types and expected responses.\n\nThis API is open to the public, free of charge. We do not take any responsibility and we are not liable for any damage caused through our services.\n\nFor the protection of our users and content, we reserve the right to refuse access to any user, namely through the use of Rate Limiting, CORS (Cross-Origin Resource Sharing) and CSRF (Cross-Site Request Forgery) protection.\n\n## MasterMoviesID Authorization\nCertain resources are protected and require valid authorization. This comes in the form of a cryptographically-signed [JSON Web Token](https://jwt.io/) that must originate from a recognized Authority, such as the Authorization Endpoint on this API. The MasterMoviesID token contains all information about a user's session.\n\nJust like any other session token, it should not be disclosed to third-parties, which would give them immediate and unconditional access to all of your privileges. The nature of JWT means that tokens can not be rejected. The token is stored as secure HTTP-only cookie, making it impossible to be accessed by anything other than the browser.\n\nResource authorizations are generally available for 24 hours.\n\n## CSRF and state-changing requests\nTo protect against CSRF attacks, any state changing request must reflect the `CSRF-Token` cookie value as a `CSRF-Token` header. The token is provided automatically by the API as soon as any request is made. You may  need to \"ping\" the API to retrieve the tokens before being able to access state-changing endpoints. An non-matching token-pair will be immediately rejected with a `403 Fobidden` HTTP response and a JSON \"Bad CSRF token\" payload.\n\nIt is safe to copy and use the `CSRF-Token`, but take care not to disclose it to any malicous people. The `CSRF-Secret`, which is cryptographically related to the token, is encrypted and can only be read and decrypted by the server.\n\n## Rate-Limiting\nRate-limiting is carried out on a global basis for the entire API, as well as a per-endpoint basis. Global rate-limiting is restricted to 60 interactions a minute, regardless of the request or response. Each endpoint is free to further restrict usage based on the nature of the action. The most \"nested\" ratelimiting function can be examined with the `X-Ratelimit-Limit`, `X-Ratelimit-Remaining` and `X-Ratelimit-Reset` headers.\n",
+    "description": "Welcome to the documentation for [MasterMovies API](https://api.mastermovies.uk), compliant with [OpenAPI v3](https://swagger.io/specification/). This document describes how clients should interact with the API, such as the request types and expected responses.\n\nThis API is open to the public, free of charge. We do not take any responsibility and we are not liable for any damage caused through our services.\n\nFor the protection of our users and content, we reserve the right to refuse access to any user, namely through the use of Rate Limiting, CORS (Cross-Origin Resource Sharing) and CSRF (Cross-Site Request Forgery) protection.\n\n## MasterMoviesID Authorization\nCertain resources are protected and require valid authorization. This comes in the form of a cryptographically-signed [JSON Web Token](https://jwt.io/) that must originate from a recognized Authority, such as the Authorization Endpoint on this API. The MasterMoviesID token contains all information about a user's session.\n\nJust like any other session token, it should not be disclosed to third-parties, which would give them immediate and unconditional access to all of your privileges. The nature of JWT means that tokens can not be rejected. The token is stored as secure HTTP-only cookie, making it impossible to be accessed by anything other than the browser.\n\nResource authorizations are generally available for 24 hours.\n\n## CSRF and state-changing requests\nTo protect against CSRF attacks, any state changing request must reflect the `CSRF-Token` cookie value as a `CSRF-Token` header. The token is provided automatically by the API as soon as any request is made. You may  need to \"ping\" the API to retrieve the tokens before being able to access state-changing endpoints. An non-matching token-pair will be immediately rejected with a `403 Fobidden` HTTP response and a JSON \"Bad CSRF token\" payload.\n\nIt is safe to copy and use the `CSRF-Token`, but take care not to disclose it to any malicous people. The `CSRF-Secret`, which is cryptographically related to the token, is encrypted and can only be read and decrypted by the server.\n\n## Rate-Limiting\nRate-limiting is carried out on a global basis for the entire API, as well as a per-endpoint basis. Global rate-limiting is restricted to 60 interactions a minute, regardless of the request or response. Each endpoint is free to further restrict usage based on the nature of the action. The most \"nested\" ratelimiting function can be examined with the `X-Ratelimit-Limit`, `X-Ratelimit-Remaining` and `X-Ratelimit-Reset` headers.\n",
     "version": "v2"
   },
   "servers": [
     {
-      "url": "https://api.mastermovies.co.uk/v2",
+      "url": "https://api.mastermovies.uk/v2",
       "description": "Production"
     }
   ],
@@ -232,13 +232,13 @@
                   "type": "string",
                   "format": "url",
                   "description": "The URL from which the resource can be downloaded",
-                  "example": "https://api.mastermovies.co.uk/glacier/film/efcce2449c95/export/922c20fe2212?download"
+                  "example": "https://api.mastermovies.uk/glacier/film/efcce2449c95/export/922c20fe2212?download"
                 },
                 "stream_url": {
                   "type": "string",
                   "format": "url",
                   "description": "The URL from which the resource can be streamed",
-                  "example": "https://api.mastermovies.co.uk/glacier/film/efcce2449c95/export/922c20fe2212"
+                  "example": "https://api.mastermovies.uk/glacier/film/efcce2449c95/export/922c20fe2212"
                 }
               }
             }
@@ -276,7 +276,7 @@
                   "type": "string",
                   "format": "url",
                   "description": "The URL from which the resource can be accessed",
-                  "example": "https://api.mastermovies.co.uk/glacier/film/efcce2449c95/thumbnail/0b3674b833f9"
+                  "example": "https://api.mastermovies.uk/glacier/film/efcce2449c95/thumbnail/0b3674b833f9"
                 }
               }
             }

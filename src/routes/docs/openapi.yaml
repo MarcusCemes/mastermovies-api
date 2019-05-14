@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: MasterMovies API [REST]
   description: |
-    Welcome to the documentation for [MasterMovies API](https://api.mastermovies.co.uk), compliant with [OpenAPI v3](https://swagger.io/specification/). This document describes how clients should interact with the API, such as the request types and expected responses.
+    Welcome to the documentation for [MasterMovies API](https://api.mastermovies.uk), compliant with [OpenAPI v3](https://swagger.io/specification/). This document describes how clients should interact with the API, such as the request types and expected responses.
 
     This API is open to the public, free of charge. We do not take any responsibility and we are not liable for any damage caused through our services.
 
@@ -24,7 +24,7 @@ info:
     Rate-limiting is carried out on a global basis for the entire API, as well as a per-endpoint basis. Global rate-limiting is restricted to 60 interactions a minute, regardless of the request or response. Each endpoint is free to further restrict usage based on the nature of the action. The most "nested" ratelimiting function can be examined with the `X-Ratelimit-Limit`, `X-Ratelimit-Remaining` and `X-Ratelimit-Reset` headers.
   version: v2
 servers:
-  - url: 'https://api.mastermovies.co.uk/v2'
+  - url: 'https://api.mastermovies.uk/v2'
     description: Production
 tags:
   - name: Root Endpoint
@@ -197,12 +197,12 @@ components:
                 type: string
                 format: url
                 description: The URL from which the resource can be downloaded
-                example: https://api.mastermovies.co.uk/glacier/film/efcce2449c95/export/922c20fe2212?download
+                example: https://api.mastermovies.uk/glacier/film/efcce2449c95/export/922c20fe2212?download
               stream_url:
                 type: string
                 format: url
                 description: The URL from which the resource can be streamed
-                example: https://api.mastermovies.co.uk/glacier/film/efcce2449c95/export/922c20fe2212
+                example: https://api.mastermovies.uk/glacier/film/efcce2449c95/export/922c20fe2212
         thumbnails:
           type: array
           description: A list of availiable thumbnails for the video, differing in size, format, etc...
@@ -232,7 +232,7 @@ components:
                 type: string
                 format: url
                 description: The URL from which the resource can be accessed
-                example: https://api.mastermovies.co.uk/glacier/film/efcce2449c95/thumbnail/0b3674b833f9
+                example: https://api.mastermovies.uk/glacier/film/efcce2449c95/thumbnail/0b3674b833f9
 
 paths:
   /:

@@ -1,8 +1,8 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://mastermovies.co.uk">
-    <img src="https://mastermovies.co.uk/icon.png" alt="Logo" width="80" height="80">
+  <a href="https://mastermovies.uk">
+    <img src="https://mastermovies.uk/icons/icon-256x256.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">MasterMovies API [REST] v2</h3>
@@ -10,9 +10,9 @@
   <p align="center">
     The Typescript Node.js source code to the MasterMovies domain
     <br />
-    <a href="https://mastermovies.co.uk"><strong>Visit MasterMovies »</strong></a>
+    <a href="https://mastermovies.uk"><strong>Visit MasterMovies »</strong></a>
     &nbsp;
-    <a href="https://api.mastermovies.co.uk"><strong>Try the API »</strong></a>
+    <a href="https://api.mastermovies.uk"><strong>Try the API »</strong></a>
   </p>
 </p>
 
@@ -61,9 +61,9 @@ Distributed under the Apache 2.0 License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Marcus Cemes - [@MarcusCemes](https://twitter.com/MarcusCemes) - marcus@mastermovies.co.uk
+Marcus Cemes - [@MarcusCemes](https://twitter.com/MarcusCemes) - marcus@mastermovies.uk
 
-Project Link: [https://mastermovies.co.uk](https://mastermovies.co.uk) - [https://api.mastermovies.co.uk](https://api.mastermovies.co.uk)
+Project Link: [https://mastermovies.uk](https://mastermovies.uk) - [https://api.mastermovies.uk](https://api.mastermovies.uk)
 
 
 ### Disclaimer
