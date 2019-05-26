@@ -10,7 +10,7 @@ export default function initialize(app: Application): void {
     limit(
       new RateLimiterMemory({
         duration: 60,
-        points: 60
+        points: 240
       })
     )
   );

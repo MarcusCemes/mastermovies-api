@@ -40,7 +40,10 @@ export async function authorizeFilm(req: Request, res: Response, next: (err?: Er
   }
 
   const reward = await hit(authLimiter, req.ip, res);
-  if (typeof reward !== "function") return;
+  if (typeof reward !== "function") {
+    statusResponse(res, 429, "Too many wrong attempts");
+    return;
+  }
 
   try {
 
