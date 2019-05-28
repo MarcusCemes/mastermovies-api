@@ -2,6 +2,7 @@ import { Application } from "express";
 
 import { error, noStatus, ok, wait } from "../common/logger";
 import bodyParser from "./bodyParser";
+import cache from "./cache";
 import cookies from "./cookieParser";
 import csrf from "./csrf";
 import database from "./database";
@@ -16,6 +17,7 @@ import routes from "./routes";
 const ENABLED_MODULES: Array<[(app: Application) => void, string]> = [
   [database, "Postgres Database"],
   [ratelimit, "Rate Limiting"],
+  [cache, "Cache headers"],
   [bodyParser, "HTTP Body Parser"],
   [hpp, "HTTP Parameter Pollution"],
   [cookies, "Cookie parsing"],
