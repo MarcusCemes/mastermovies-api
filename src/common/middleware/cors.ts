@@ -24,7 +24,7 @@ export interface IParsedConfig {
   methods: string[];
   headers: string[];
   expose:  string[];
-  credentials: boolean;
+  credentials: string;
   restrictOrigin: boolean;
 }
 
@@ -50,19 +50,22 @@ export function cors(config: string | ICorsConfig = {}): Handler {
 }
 
 function parseConfig(config: ICorsConfig): IParsedConfig {
+  // Parse and allow OPTIONS and HEAD
   let methods = parseConfigKey(config.methods);
   if (methods.length === 0) methods.push("GET");
   if (methods.indexOf("OPTIONS") === -1) methods.push("OPTIONS");
   if (methods.indexOf("HEAD") === -1) methods.push("HEAD");
   methods = methods.sort();
 
+  // Parse and add default headers
   let headers = parseConfigKey(config.headers);
   if (headers.indexOf("Content-Type") === -1) headers.push("Content-Type");
+  if (headers.indexOf("CSRF-Token") === -1) headers.push("CSRF-Token");
   headers = headers.sort();
 
   const expose = parseConfigKey(config.expose).sort();
-  const restrictOrigin = config.restrictOrigin === true;
-  const credentials = config.credentials === true;
+  const restrictOrigin = typeof config.restrictOrigin !== "undefined" ? config.restrictOrigin : false;
+  const credentials = typeof config.credentials !== "undefined" && !config.credentials ? "false" : "true"; // needed for CSRF
 
   return {
     methods,
@@ -88,22 +91,20 @@ function createCorsHandler(config: IParsedConfig): Handler {
     const secureOrigin = isSecureOrigin ? origin : defaultOrigin;
     res.header("Access-Control-Allow-Origin", config.restrictOrigin ? secureOrigin : origin || defaultOrigin);
 
+    // Add CORS headers
+    res.header("Access-Control-Allow-Methods", config.methods.join(","));
+    res.header("Access-Control-Allow-Headers", config.headers.join(","));
+    res.header("Access-Control-Expose-Headers", config.expose.join(","));
+    res.header("Access-Control-Allow-Credentials", config.credentials.toString());
+
     // Block methods that aren't allowed
     if (config.methods.indexOf(req.method) === -1) {
-      res.header("Access-Control-Allow-Methods", config.methods.join(","));
-      res.header("Access-Control-Allow-Headers", config.headers.join(","));
-      res.header("Access-Control-Expose-Headers", config.expose.join(","));
-      res.header("Access-Control-Allow-Credentials", config.credentials.toString());
       statusResponse(res, 405);  // Method Not Allowed
       return;
     }
 
     // Respond to OPTIONS/HEAD (pre-flight request)
     if (req.method === "OPTIONS" || req.method === "HEAD") {
-      res.header("Access-Control-Allow-Methods", config.methods.join(","));
-      res.header("Access-Control-Allow-Headers", config.headers.join(","));
-      res.header("Access-Control-Expose-Headers", config.expose.join(","));
-      res.header("Access-Control-Allow-Credentials", config.credentials.toString());
       statusResponse(res, 204);  // No Content
       return;
     }
