@@ -20,7 +20,7 @@ export function CommRouter(): Router {
   return express
     .Router()
     .all("/", cors(), index)
-    .all("/contact", cors({ methods: ["POST"], restrictOrigin: true }), csrf, contact)
+    .all("/contact", cors({ methods: ["POST"] }), csrf, contact)
 }
 
 function index(req: Request, res: Response, _next: (err?: Error) => void): void {
