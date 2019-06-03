@@ -8,7 +8,7 @@ import { cleanAndSignJwt, verifyAndExtractJwt } from "../common/jwt";
 import { AppConfig, AuthConfig } from "../config";
 import { IJwtPayload } from "../types/express";
 
-const JWT_COOKIE_OPTIONS: CookieOptions = {
+export const JWT_COOKIE_OPTIONS: CookieOptions = {
   path: "/",
   maxAge: AuthConfig.auth_jwt_lifetime * 1000,
   httpOnly: true,
