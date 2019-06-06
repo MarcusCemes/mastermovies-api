@@ -63,7 +63,11 @@ function parseConfig(config: ICorsConfig): IParsedConfig {
   if (headers.indexOf("CSRF-Token") === -1) headers.push("CSRF-Token");
   headers = headers.sort();
 
-  const expose = parseConfigKey(config.expose).sort();
+  let expose = parseConfigKey(config.expose).sort();
+  if (expose.indexOf("X-RateLimit-Limit") === -1) expose.push("X-RateLimit-Limit");
+  if (expose.indexOf("X-RateLimit-Remaining") === -1) expose.push("X-RateLimit-Remaining");
+  if (expose.indexOf("X-RateLimit-Reset") === -1) expose.push("X-RateLimit-Reset");
+
   const restrictOrigin = typeof config.restrictOrigin !== "undefined" ? config.restrictOrigin : false;
   const credentials = typeof config.credentials !== "undefined" && !config.credentials ? "false" : "true"; // needed for CSRF
 
@@ -92,9 +96,9 @@ function createCorsHandler(config: IParsedConfig): Handler {
     res.header("Access-Control-Allow-Origin", config.restrictOrigin ? secureOrigin : origin || defaultOrigin);
 
     // Add CORS headers
-    res.header("Access-Control-Allow-Methods", config.methods.join(","));
-    res.header("Access-Control-Allow-Headers", config.headers.join(","));
-    res.header("Access-Control-Expose-Headers", config.expose.join(","));
+    res.header("Access-Control-Allow-Methods", config.methods.join(", "));
+    res.header("Access-Control-Allow-Headers", config.headers.join(", "));
+    res.header("Access-Control-Expose-Headers", config.expose.join(", "));
     res.header("Access-Control-Allow-Credentials", config.credentials.toString());
 
     // Block methods that aren't allowed

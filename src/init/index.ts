@@ -7,7 +7,6 @@ import cookies from "./cookieParser";
 import csrf from "./csrf";
 import database from "./database";
 import errorHandlers from "./errorHandlers";
-import helmet from "./helmet";
 import hpp from "./hpp";
 import jwt from "./jwt";
 import ratelimit from "./ratelimit";
@@ -22,7 +21,6 @@ const ENABLED_MODULES: Array<[(app: Application) => void, string]> = [
   [hpp, "HTTP Parameter Pollution"],
   [cookies, "Cookie parsing"],
   [csrf, "Cross Site Request Forgery"],
-  [helmet, "Secure HTTP Response Headers"],
   [jwt, "JSON Web Token Authentication"],
   [routes, "Endpoint Routing"],
   [errorHandlers, "Error Handling"]

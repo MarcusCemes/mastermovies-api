@@ -51,9 +51,9 @@ export async function hit(limiter: RateLimiterAbstract, ip: string, res: Respons
 
 function setRateHeaders(res: Response, result: RateLimiterRes): void {
   res.set({
-    // "Retry-After": result.msBeforeNext / 1000,
     "X-RateLimit-Limit": result.consumedPoints + result.remainingPoints,
     "X-RateLimit-Remaining": result.remainingPoints,
     "X-RateLimit-Reset": Math.round((Date.now() + result.msBeforeNext) / 1000)
   });
+  res.set("Access-Control-Expose-Headers", "X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset");
 }
