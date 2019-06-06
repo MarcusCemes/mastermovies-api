@@ -62,7 +62,7 @@ export async function authorizeFilm(req: Request, res: Response, next: (err?: Er
       return;
 
     } else {
-      statusResponse(res, 403, "Credentials rejected");
+      statusResponse(res, 401, "Bad credentials");
       return;
     }
 
