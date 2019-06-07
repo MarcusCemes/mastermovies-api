@@ -10,6 +10,7 @@ import { securePath } from "../common/helpers.js";
 import { statusResponse } from "../common/statusResponse";
 import { isValidHex } from "../common/util";
 import { attachViewIncrementor } from "./views";
+import { cacheHeaders } from "../../common/cacheHeaders";
 
 // Create authorization rate limiting
 const _authLimiter = new RateLimiterMemory({
@@ -43,7 +44,7 @@ export async function downloadFilm(req: Request, res: Response, next: (err?: any
     if (typeof grant === "function") {
 
       const token = (await req.user).data;
-      const validAuthorization = filmDownloadInfo.restricted === false || token.glacier
+      const validAuthorization = token.glacier
         && token.glacier.authorizations
         && token.glacier.authorizations[req.params.film]
         && token.glacier.authorizations[req.params.film] >= Math.round(Date.now()/1000); // to seconds
@@ -51,7 +52,7 @@ export async function downloadFilm(req: Request, res: Response, next: (err?: any
           grant();
           startDownload(filmDownloadInfo, req, res, next);
         } else {
-          statusResponse(res, 401, "This is a protected resource");
+          statusResponse(res, 401, "An access token is required");
           return;
         }
 
@@ -99,6 +100,8 @@ function startDownload(
         GlacierConfig.glacier_view_threshold,
         info.size
       );
+
+      cacheHeaders(res, false);
 
       if (typeof req.query.download === "undefined") {
         res.sendFile(filePath, { headers: { "Content-Type": info.mime } });
