@@ -10,7 +10,6 @@ import { securePath } from "../common/helpers.js";
 import { statusResponse } from "../common/statusResponse";
 import { isValidHex } from "../common/util";
 import { attachViewIncrementor } from "./views";
-import { cacheHeaders } from "../../common/cacheHeaders";
 
 // Create authorization rate limiting
 const _authLimiter = new RateLimiterMemory({
@@ -101,7 +100,7 @@ function startDownload(
         info.size
       );
 
-      cacheHeaders(res, false);
+      res.set("Cache-Control", ["public", "no-cache", "proxy-revalidate"]);
 
       if (typeof req.query.download === "undefined") {
         res.sendFile(filePath, { headers: { "Content-Type": info.mime } });
