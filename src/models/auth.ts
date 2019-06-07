@@ -2,8 +2,7 @@ import { Pool } from "pg";
 
 import { isValidHex } from "../routes/common/util";
 
-const CHECK_FILM_EXISTS =
-`SELECT EXISTS(
+const CHECK_FILM_EXISTS = `SELECT EXISTS(
   SELECT 1
   FROM films.film
   WHERE films.film.fingerprint = decode($1, 'hex')
@@ -39,9 +38,11 @@ SELECT EXISTS (
   WHERE films.key.value = $2
 ) AS authorized;`;
 
-
-export async function checkFilmAuthorization(pool: Pool, film: string, key: string): Promise<boolean> {
-
+export async function checkFilmAuthorization(
+  pool: Pool,
+  film: string,
+  key: string
+): Promise<boolean> {
   if (!isValidHex(film)) {
     return undefined;
   }
@@ -49,5 +50,6 @@ export async function checkFilmAuthorization(pool: Pool, film: string, key: stri
   const exists = (await pool.query(CHECK_FILM_EXISTS, [film])).rows[0].exists;
   if (!exists) return void 0;
 
-  return (await pool.query(CHECK_FILM_AUTHORIZATION, [film, key])).rows[0].authorized;
+  return (await pool.query(CHECK_FILM_AUTHORIZATION, [film, key])).rows[0]
+    .authorized;
 }

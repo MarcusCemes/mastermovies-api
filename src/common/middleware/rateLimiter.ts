@@ -14,7 +14,7 @@ export function limit(limiter: RateLimiterAbstract) {
   ): Promise<void> => {
     if (await hit(limiter, req.ip, res)) {
       next();
-    };
+    }
   };
 }
 
@@ -24,7 +24,11 @@ export function limit(limiter: RateLimiterAbstract) {
  * the hit. It also returns whether the reversal was successful.
  * On failure, returns false (IP exhausted the limit)
  */
-export async function hit(limiter: RateLimiterAbstract, ip: string, res: Response): Promise<(() => Promise<boolean>) | false> {
+export async function hit(
+  limiter: RateLimiterAbstract,
+  ip: string,
+  res: Response
+): Promise<(() => Promise<boolean>) | false> {
   if (ip) {
     try {
       const result = await limiter.consume(ip);
@@ -47,13 +51,14 @@ export async function hit(limiter: RateLimiterAbstract, ip: string, res: Respons
   return false;
 }
 
-
-
 function setRateHeaders(res: Response, result: RateLimiterRes): void {
   res.set({
     "X-RateLimit-Limit": result.consumedPoints + result.remainingPoints,
     "X-RateLimit-Remaining": result.remainingPoints,
     "X-RateLimit-Reset": Math.round((Date.now() + result.msBeforeNext) / 1000)
   });
-  res.set("Access-Control-Expose-Headers", "X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset");
+  res.set(
+    "Access-Control-Expose-Headers",
+    "X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset"
+  );
 }

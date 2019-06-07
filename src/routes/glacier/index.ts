@@ -10,7 +10,6 @@ import { downloadFilm } from "./download";
 import { downloadThumbnail } from "./thumbnail";
 
 export function GlacierRouter(): Router {
-
   // Require config
   if (!GlacierConfig) {
     return serviceUnavailable();
@@ -25,15 +24,23 @@ export function GlacierRouter(): Router {
     .all("/film/:film/thumbnail/:thumbnail", cors(), downloadThumbnail);
 }
 
-function index(req: Request, res: Response, _next: (err?: Error) => void): void {
-
+function index(
+  req: Request,
+  res: Response,
+  _next: (err?: Error) => void
+): void {
   const base = AppConfig.base;
   res.status(200).json({
     _message: AppConfig.title + " - Glacier Endpoint",
     list_url: base + posix.normalize(`${req.originalUrl}/list{?public}`),
     film_url: base + posix.normalize(`${req.originalUrl}/film/{film}`),
-    export_url: base + posix.normalize(`${req.originalUrl}/film/{film}/export/{export}?download`),
-    thumbnail_url: base + posix.normalize(`${req.originalUrl}/film/{film}/thumbnail/{thumbnail}`)
+    export_url:
+      base +
+      posix.normalize(
+        `${req.originalUrl}/film/{film}/export/{export}?download`
+      ),
+    thumbnail_url:
+      base +
+      posix.normalize(`${req.originalUrl}/film/{film}/thumbnail/{thumbnail}`)
   });
-
 }

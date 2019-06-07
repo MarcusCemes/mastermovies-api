@@ -4,11 +4,12 @@ import { Request, Response } from "express";
 
 import { extractJwt } from "../../common/jwt";
 
-
-export async function query(req: Request, res: Response, _next: (err?: Error) => void) {
-
+export async function query(
+  req: Request,
+  res: Response,
+  _next: (err?: Error) => void
+) {
   const user = await req.user;
   const queryResponse = extractJwt(user.data);
   res.status(200).json(queryResponse);
-
 }

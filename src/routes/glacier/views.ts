@@ -12,7 +12,13 @@ import { incrementViews } from "../../models/glacier";
  * a certain threshold, the view counter for the specified film
  * will be incremented.
  */
-export function attachViewIncrementor(res: Response, pool: Pool, fingerprint: string, threshold: number, fileSize: number): void {
+export function attachViewIncrementor(
+  res: Response,
+  pool: Pool,
+  fingerprint: string,
+  threshold: number,
+  fileSize: number
+): void {
   let transferredData = 0;
   const counter = new Writable({
     write: (chunk, _encoding, callback) => {

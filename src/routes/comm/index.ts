@@ -11,7 +11,6 @@ import { contact } from "./contact";
 
 /** Provides communication such as contact forms */
 export function CommRouter(): Router {
-
   // Require config
   if (!CommConfig) {
     return serviceUnavailable();
@@ -20,16 +19,17 @@ export function CommRouter(): Router {
   return express
     .Router()
     .all("/", cors(), index)
-    .all("/contact", cors({ methods: ["POST"] }), csrf, contact)
+    .all("/contact", cors({ methods: ["POST"] }), csrf, contact);
 }
 
-function index(req: Request, res: Response, _next: (err?: Error) => void): void {
-
+function index(
+  req: Request,
+  res: Response,
+  _next: (err?: Error) => void
+): void {
   const base = AppConfig.base;
   res.status(200).json({
     _message: AppConfig.title + " - Communication Endpoint",
-    contact_url: base + posix.normalize(`${req.originalUrl}/contact`),
+    contact_url: base + posix.normalize(`${req.originalUrl}/contact`)
   });
-
 }
-

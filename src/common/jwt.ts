@@ -6,47 +6,48 @@ import jwt from "jsonwebtoken";
 import { AuthConfig } from "../config";
 import { IJwtPayload } from "../types/express";
 
-
 /** Low level function to verify a JWT */
 export function verifyJwt(token: string): Promise<IJwtPayload> {
   return new Promise((resolve, reject) => {
-
-    jwt.verify(token, AuthConfig.auth_jwt_secret, {
-      algorithms: AuthConfig.auth_jwt_algorithm,
-      audience: AuthConfig.auth_jwt_audience,
-    }, (err, decoded) => {
-
-      if (err) {
-        reject(err);
-      } else if (typeof decoded !== "object") {
-        reject(new Error ("Decoded JWT was not an object"));
-      } else {
-        resolve(decoded);
+    jwt.verify(
+      token,
+      AuthConfig.auth_jwt_secret,
+      {
+        algorithms: AuthConfig.auth_jwt_algorithm,
+        audience: AuthConfig.auth_jwt_audience
+      },
+      (err, decoded) => {
+        if (err) {
+          reject(err);
+        } else if (typeof decoded !== "object") {
+          reject(new Error("Decoded JWT was not an object"));
+        } else {
+          resolve(decoded);
+        }
       }
-
-    });
-
+    );
   });
 }
 
 /** Low level function to sign a JWt */
 export function signJwt(token: IJwtPayload): Promise<string> {
   return new Promise((resolve, reject) => {
-
-    jwt.sign(token, AuthConfig.auth_jwt_secret, {
-      algorithm: AuthConfig.auth_jwt_algorithm[0],
-      audience: AuthConfig.auth_jwt_audience,
-      expiresIn: AuthConfig.auth_jwt_lifetime
-    }, (err, signed) => {
-
-      if (err) {
-        reject(err);
-      } else {
-        resolve(signed);
+    jwt.sign(
+      token,
+      AuthConfig.auth_jwt_secret,
+      {
+        algorithm: AuthConfig.auth_jwt_algorithm[0],
+        audience: AuthConfig.auth_jwt_audience,
+        expiresIn: AuthConfig.auth_jwt_lifetime
+      },
+      (err, signed) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(signed);
+        }
       }
-
-    });
-
+    );
   });
 }
 
@@ -55,11 +56,9 @@ export function signJwt(token: IJwtPayload): Promise<string> {
  * to ensure a correct ResolvedJWT object.
  */
 export async function verifyAndExtractJwt(token: string): Promise<IJwtPayload> {
-
   const result = await verifyJwt(token);
   if (typeof result !== "object") throw new Error("Bad payload");
   return extractJwt(result as IJwtPayload);
-
 }
 
 /** Low level function to extract known properties from a JWT token */
@@ -71,7 +70,6 @@ export function extractJwt(token: IJwtPayload): IJwtPayload {
 
 /** High level function to test whether can be cleaned/compacted */
 export function shouldCleanJwt(token: IJwtPayload): boolean {
-
   // Test glacier authorizations
   const auths = token.glacier && token.glacier.authorizations;
   if (auths) {
@@ -82,17 +80,16 @@ export function shouldCleanJwt(token: IJwtPayload): boolean {
   }
 
   return false;
-
 }
 
 /**
  * High level function to clean up and sign the JWT.
  * Also extends the JWT's lifetime (exp).
  */
-export async function cleanAndSignJwt(token: IJwtPayload): Promise<string | null> {
-
+export async function cleanAndSignJwt(
+  token: IJwtPayload
+): Promise<string | null> {
   return signJwt(cleanJwt(token));
-
 }
 
 /**
@@ -100,7 +97,6 @@ export async function cleanAndSignJwt(token: IJwtPayload): Promise<string | null
  * @returns {IJwtPayload} A new object that reflects the given token
  */
 export function cleanJwt(token: IJwtPayload): IJwtPayload {
-
   const newToken: IJwtPayload = {};
   if (typeof token !== "object") return null;
 
@@ -120,7 +116,6 @@ export function cleanJwt(token: IJwtPayload): IJwtPayload {
   }
 
   return newToken;
-
 }
 
 /** Get the current epoch with second precision */

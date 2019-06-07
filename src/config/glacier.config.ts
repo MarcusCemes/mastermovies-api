@@ -10,7 +10,8 @@ export const GlacierConfig: IGlacierConfig = verifyConfig(
   {
     glacier_film_storage: process.env.GLACIER_FILM_STORAGE,
     glacier_thumbnail_storage: process.env.GLACIER_THUMBNAIL_STORAGE,
-    glacier_view_threshold: parseInt(process.env.GLACIER_VIEW_THRESHOLD, 10) || 0.2
+    glacier_view_threshold:
+      parseInt(process.env.GLACIER_VIEW_THRESHOLD, 10) || 0.2
   },
   [
     "glacier_film_storage",

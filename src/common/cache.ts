@@ -16,8 +16,11 @@ const cache: { [index: string]: { [index: string]: any } } = {};
  * @param {any} value The item to store under "scope/key".
  * @returns {boolean} Store operation success, or failure if already exists
  */
-export function cacheStore(scope: string = "common", key: any, value: any): boolean {
-
+export function cacheStore(
+  scope: string = "common",
+  key: any,
+  value: any
+): boolean {
   const keyHash = hash(key);
 
   if (typeof cache[scope] === "undefined") cache[scope] = {};
@@ -28,16 +31,13 @@ export function cacheStore(scope: string = "common", key: any, value: any): bool
   }
 
   return false;
-
 }
-
 
 /**
  * Retrieve an item from cache using the given scope and key.
  * See the `store` function.
  */
 export function cacheRetrieve(scope: string, key: any): any | undefined {
-
   if (typeof cache[scope] === "undefined") return undefined;
 
   const keyHash = hash(key);
@@ -47,5 +47,4 @@ export function cacheRetrieve(scope: string, key: any): any | undefined {
   }
 
   return undefined;
-
 }

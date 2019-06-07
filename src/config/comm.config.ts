@@ -9,7 +9,6 @@ export const CommConfig: ICommConfig = verifyConfig(
   {
     system_email: "MasterMovies <system@mastermovies.uk>",
     operator_email: "marcus@mastermovies.uk"
-  }, [
-    "system_email",
-    "operator_email"
-  ]);
+  },
+  ["system_email", "operator_email"]
+);

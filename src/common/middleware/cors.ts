@@ -15,7 +15,7 @@ const CACHE_SCOPE = "cors";
 export interface ICorsConfig {
   methods?: string | string[];
   headers?: string | string[];
-  expose?:  string | string[];
+  expose?: string | string[];
   credentials?: boolean;
   restrictOrigin?: boolean;
 }
@@ -23,7 +23,7 @@ export interface ICorsConfig {
 export interface IParsedConfig {
   methods: string[];
   headers: string[];
-  expose:  string[];
+  expose: string[];
   credentials: string;
   restrictOrigin: boolean;
 }
@@ -34,9 +34,9 @@ export interface IParsedConfig {
  * for full customization. If *null* or *undefined*, `methods` defaults to \["GET"\]
  */
 export function cors(config: string | ICorsConfig = {}): Handler {
-
-
-  const parsedConfig = parseConfig(typeof config === "string" ? { methods: config } : config);
+  const parsedConfig = parseConfig(
+    typeof config === "string" ? { methods: config } : config
+  );
   const hit = cacheRetrieve(CACHE_SCOPE, parsedConfig);
 
   if (typeof hit === "undefined") {
@@ -46,7 +46,6 @@ export function cors(config: string | ICorsConfig = {}): Handler {
   } else {
     return hit;
   }
-
 }
 
 function parseConfig(config: ICorsConfig): IParsedConfig {
@@ -63,13 +62,23 @@ function parseConfig(config: ICorsConfig): IParsedConfig {
   if (headers.indexOf("CSRF-Token") === -1) headers.push("CSRF-Token");
   headers = headers.sort();
 
-  let expose = parseConfigKey(config.expose).sort();
-  if (expose.indexOf("X-RateLimit-Limit") === -1) expose.push("X-RateLimit-Limit");
-  if (expose.indexOf("X-RateLimit-Remaining") === -1) expose.push("X-RateLimit-Remaining");
-  if (expose.indexOf("X-RateLimit-Reset") === -1) expose.push("X-RateLimit-Reset");
+  let expose = parseConfigKey(config.expose);
+  if (expose.indexOf("X-RateLimit-Limit") === -1)
+    expose.push("X-RateLimit-Limit");
+  if (expose.indexOf("X-RateLimit-Remaining") === -1)
+    expose.push("X-RateLimit-Remaining");
+  if (expose.indexOf("X-RateLimit-Reset") === -1)
+    expose.push("X-RateLimit-Reset");
+  expose = expose.sort();
 
-  const restrictOrigin = typeof config.restrictOrigin !== "undefined" ? config.restrictOrigin : false;
-  const credentials = typeof config.credentials !== "undefined" && !config.credentials ? "false" : "true"; // needed for CSRF
+  const restrictOrigin =
+    typeof config.restrictOrigin !== "undefined"
+      ? config.restrictOrigin
+      : false;
+  const credentials =
+    typeof config.credentials !== "undefined" && !config.credentials
+      ? "false"
+      : "true"; // needed for CSRF
 
   return {
     methods,
@@ -88,38 +97,43 @@ function parseConfigKey(item: string | string[]): string[] {
 
 function createCorsHandler(config: IParsedConfig): Handler {
   return (req: Request, res: Response, next: (err?: Error) => void) => {
-
     // Reflect the origin header based on endpoint origin restrictions
     const origin = req.get("Origin");
-    const isSecureOrigin = typeof origin === "string" && allowedOrigin.test(origin);
+    const isSecureOrigin =
+      typeof origin === "string" && allowedOrigin.test(origin);
     const secureOrigin = isSecureOrigin ? origin : defaultOrigin;
-    res.header("Access-Control-Allow-Origin", config.restrictOrigin ? secureOrigin : origin || defaultOrigin);
+    res.header(
+      "Access-Control-Allow-Origin",
+      config.restrictOrigin ? secureOrigin : origin || defaultOrigin
+    );
 
     // Add CORS headers
     res.header("Access-Control-Allow-Methods", config.methods.join(", "));
     res.header("Access-Control-Allow-Headers", config.headers.join(", "));
     res.header("Access-Control-Expose-Headers", config.expose.join(", "));
-    res.header("Access-Control-Allow-Credentials", config.credentials.toString());
+    res.header(
+      "Access-Control-Allow-Credentials",
+      config.credentials.toString()
+    );
 
     // Block methods that aren't allowed
     if (config.methods.indexOf(req.method) === -1) {
-      statusResponse(res, 405);  // Method Not Allowed
+      statusResponse(res, 405); // Method Not Allowed
       return;
     }
 
     // Respond to OPTIONS/HEAD (pre-flight request)
     if (req.method === "OPTIONS" || req.method === "HEAD") {
-      statusResponse(res, 204);  // No Content
+      statusResponse(res, 204); // No Content
       return;
     }
 
     // Deny restricted requests
     if (config.restrictOrigin === true && isSecureOrigin !== true) {
-      statusResponse(res, 403, "Origin blocked by endpoint CORS policy");  // Forbidden
+      statusResponse(res, 403, "Origin blocked by endpoint CORS policy"); // Forbidden
       return;
     }
 
     next();
-
   };
 }

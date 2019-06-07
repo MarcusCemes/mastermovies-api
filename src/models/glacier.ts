@@ -50,7 +50,7 @@ export interface IFilmDownloadInfo {
   name: string;
   release: Date;
   size: number;
-  mime: string,
+  mime: string;
   restricted: boolean;
 }
 
@@ -131,7 +131,8 @@ export async function getFilms(
   );
   for (const row of rows) {
     // row.film_url = base + "glacier/film/" + row.fingerprint;
-    row.film_url = base + posix.normalize(`${req.originalUrl}/../film/${row.fingerprint}`)
+    row.film_url =
+      base + posix.normalize(`${req.originalUrl}/../film/${row.fingerprint}`);
   }
   return rows;
 }
@@ -168,8 +169,13 @@ export async function getFilm(
         video_codec: exp.video_codec,
         audio_codec: exp.audio_codec,
         stream_optimized: exp.stream_optimized,
-        download_url: base + posix.resolve(`${req.originalUrl}/export/${exp.fingerprint}?download`),
-        stream_url: base + posix.resolve(`${req.originalUrl}/export/${exp.fingerprint}`),
+        download_url:
+          base +
+          posix.resolve(
+            `${req.originalUrl}/export/${exp.fingerprint}?download`
+          ),
+        stream_url:
+          base + posix.resolve(`${req.originalUrl}/export/${exp.fingerprint}`)
       });
     }
     for (const thumb of thumbnailResult.rows) {
@@ -178,7 +184,9 @@ export async function getFilm(
         width: thumb.width,
         height: thumb.height,
         mime: thumb.mime,
-        image_url: base + posix.resolve(`${req.originalUrl}/thumbnail/${thumb.fingerprint}`)
+        image_url:
+          base +
+          posix.resolve(`${req.originalUrl}/thumbnail/${thumb.fingerprint}`)
       });
     }
     return result;
@@ -198,10 +206,7 @@ export async function getFilmDownloadInfo(
   return rows[0];
 }
 
-export async function incrementViews(
-  pool: Pool,
-  film: string
-): Promise<void> {
+export async function incrementViews(pool: Pool, film: string): Promise<void> {
   if (isValidHex(film)) {
     await pool.query(FILM_INCREMENT_VIEWS_QUERY, [film]);
   }

@@ -15,12 +15,13 @@ try {
   cipher.update(text, "utf8");
   cipher.final();
 } catch (err) {
-  throw new Error("Unable to initialize the encryption/decryption algorithm:\n" + err.message);
+  throw new Error(
+    "Unable to initialize the encryption/decryption algorithm:\n" + err.message
+  );
 }
 
 /** Encrypts a utf8 string into a base64 data+iv */
-export function encrypt(data: string): { data: string, iv: string } {
-
+export function encrypt(data: string): { data: string; iv: string } {
   const key = AppConfig.encryption_key;
   const iv = randomBytes(IV_LENGTH);
   const cipher = createCipheriv(ALGORITHM, key, iv);
@@ -29,13 +30,10 @@ export function encrypt(data: string): { data: string, iv: string } {
   result += cipher.final("base64");
 
   return { data: result, iv: iv.toString("base64") };
-
 }
-
 
 /** Decrypts base64 data+iv into a utf8 string */
 export function decrypt(data: string, iv: string): string {
-
   const key = AppConfig.encryption_key;
   const decipher = createDecipheriv(ALGORITHM, key, Buffer.from(iv, "base64"));
 
@@ -43,5 +41,4 @@ export function decrypt(data: string, iv: string): string {
   result += decipher.final("utf8");
 
   return result;
-
 }

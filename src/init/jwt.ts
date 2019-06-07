@@ -14,16 +14,14 @@ export const JWT_COOKIE_OPTIONS: CookieOptions = {
   httpOnly: true,
   sameSite: false,
   domain: AppConfig.domain,
-  secure: true,
+  secure: true
 };
 
 /** Add support for asynchronous session decoding/updating */
 export default async function initialize(app: Application) {
   app.use((req: Request, res: Response, next: (err?: Error) => void) => {
-
     // Resolve the user object as a Promise
     req.user = (async () => {
-
       // Try and read a valid JWT, or start afresh if it's expired/is invalid
       let token: IJwtPayload;
       try {
@@ -38,7 +36,11 @@ export default async function initialize(app: Application) {
       const updateFunction = async (newToken: IJwtPayload) => {
         try {
           const newSignedToken = await cleanAndSignJwt(newToken);
-          res.cookie(AuthConfig.auth_jwt_cookie_name, newSignedToken, JWT_COOKIE_OPTIONS);
+          res.cookie(
+            AuthConfig.auth_jwt_cookie_name,
+            newSignedToken,
+            JWT_COOKIE_OPTIONS
+          );
           return true;
         } catch (err) {
           return false;
@@ -46,16 +48,13 @@ export default async function initialize(app: Application) {
       };
 
       return Object.freeze({ update: updateFunction, data: token });
-
     })();
 
     next();
-
   });
 }
 
 function getToken(req: Request): string {
-
   // Check the headers
   if (req.headers) {
     const header = req.headers.authorization;

@@ -16,8 +16,8 @@ export const contactLimiter = new RateLimiterMemory({
 
 const transporter = createTransport({
   sendmail: true,
-  newline: 'unix',
-  path: '/usr/sbin/sendmail'
+  newline: "unix",
+  path: "/usr/sbin/sendmail"
 });
 
 export interface ICommContactRequest {
@@ -27,9 +27,11 @@ export interface ICommContactRequest {
   message: string;
 }
 
-
-export async function contact(req: Request, res: Response, next: (err?: Error) => void) {
-
+export async function contact(
+  req: Request,
+  res: Response,
+  next: (err?: Error) => void
+) {
   const payload: ICommContactRequest = req.body;
   if (!payload) {
     statusResponse(res, 400, "Missing payload");
@@ -46,12 +48,16 @@ export async function contact(req: Request, res: Response, next: (err?: Error) =
   if (typeof reward !== "function") {
     statusResponse(res, 429, "Too many sent emails");
     return;
-  };
+  }
 
   try {
-
     // Attempt to send the operator email
-    const operatorEmail = await generateOperatorEmail(name, email, subject, message);
+    const operatorEmail = await generateOperatorEmail(
+      name,
+      email,
+      subject,
+      message
+    );
     let operatorSuccess = false;
     let operatorError;
     try {
@@ -62,11 +68,19 @@ export async function contact(req: Request, res: Response, next: (err?: Error) =
     }
 
     // Attempt to send the user email if the email is valid
-    const userEmail = await generateUserEmail(operatorSuccess, name, email, subject, message);
+    const userEmail = await generateUserEmail(
+      operatorSuccess,
+      name,
+      email,
+      subject,
+      message
+    );
     if (userEmail) {
       try {
-          await transporter.sendMail(userEmail);
-      } catch (err) {/* */}
+        await transporter.sendMail(userEmail);
+      } catch (err) {
+        /* */
+      }
     }
 
     if (operatorSuccess) {
@@ -75,10 +89,8 @@ export async function contact(req: Request, res: Response, next: (err?: Error) =
     }
 
     throw operatorError;
-
   } catch (err) {
     next(err);
     return;
   }
-
 }
