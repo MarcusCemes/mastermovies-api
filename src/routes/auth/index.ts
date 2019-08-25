@@ -1,50 +1,18 @@
-// MasterMovies API - Authorization Endpoint
-import express, { Request, Response, Router } from "express";
-import { posix } from "path";
+import Router from "@koa/router";
 
-import { cors } from "../../common/middleware/cors";
-import { csrf } from "../../common/middleware/csrf";
-import { AppConfig, AuthConfig } from "../../config";
-import { serviceUnavailable } from "../common/serviceUnavailable";
-import { authorizeFilm } from "./authorize";
-import { logout } from "./logout";
-import { query } from "./query";
+import { ApiContext, ApiState } from "../../typings/App";
+import { checkRequirements } from "./requirements";
+import { attachAuthRoutes } from "./routes";
 
-/** Provides authentication and authorization */
-export function AuthRouter(): Router {
-  // Require config
-  if (!AuthConfig) {
-    return serviceUnavailable();
-  }
+/** Generate the Glacier endpoint router */
+export async function AuthRouter(): Promise<Router | null> {
+  const router = new Router<ApiState, ApiContext>();
 
-  return express
-    .Router()
-    .all("/", cors(), index)
-    .all(
-      "/authorize",
-      cors({ methods: ["POST"], restrictOrigin: true }),
-      csrf,
-      authorizeFilm
-    )
-    .all(
-      "/logout",
-      cors({ methods: ["POST"], restrictOrigin: true }),
-      csrf,
-      logout
-    )
-    .all("/query", cors(), query);
-}
+  // Verify endpoint requirements
+  if (!(await checkRequirements())) return null;
 
-function index(
-  req: Request,
-  res: Response,
-  _next: (err?: Error) => void
-): void {
-  const base = AppConfig.base;
-  res.status(200).json({
-    _message: AppConfig.title + " - Authorization Endpoint",
-    authorize_url: base + posix.normalize(`${req.originalUrl}/authorize`),
-    logout_url: base + posix.normalize(`${req.originalUrl}/logout`),
-    query_url: base + posix.normalize(`${req.originalUrl}/query`)
-  });
+  // Generate all Glacier routes
+  attachAuthRoutes(router);
+
+  return router;
 }

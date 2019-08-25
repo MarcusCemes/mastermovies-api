@@ -10,21 +10,18 @@
       "name": "Launch",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": null,
-      "args": [],
+      "args": ["|", "pino-pretty"],
       "stopOnEntry": false,
-      "runtimeArgs": [ "--nolazy", "-r", "dotenv/config" ],
+      "runtimeArgs": ["--nolazy", "-r", "dotenv/config", "-r", "source-map-support/register"],
       "preLaunchTask": null,
+      "timeout": 2000,
       "env": {
-        "NODE_ENV": "development",
         "LOG_LEVEL": "debug"
       },
       "console": "integratedTerminal",
-      "program": "${workspaceFolder}\\build\\main\\index.js",
+      "program": "${workspaceFolder}\\build\\index.js",
       "outFiles": ["${workspaceFolder}/build/**/*.js"],
-      "skipFiles": [
-        "${workspaceFolder}/node_modules/**/*.js",
-        "<node_internals>/**/*.js"
-      ]
+      "skipFiles": ["${workspaceFolder}/node_modules/**/*.js", "<node_internals>/**/*.js"]
     }
   ]
 }

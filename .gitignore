@@ -4,5 +4,7 @@ test
 src/**.js
 .idea/*
 .env
+db.sqlite3
 
 *.log
+src.old
