@@ -13,6 +13,7 @@ interface BasicJwtProperties {
 /** A MasterMovies API session context */
 interface ApiSession extends BasicJwtProperties {
   glacier?: {
+    /** Contains expiry in UNIX seconds timestamp */
     authorisations?: { [index: number]: number };
   };
 }

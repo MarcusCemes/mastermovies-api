@@ -18,10 +18,7 @@ export function corsMiddleware() {
     await next();
 
     if (!ctx.cors) {
-      ctx.set(
-        "Access-Control-Allow-Origin",
-        DOMAIN_REGEX.test(origin) ? origin : "https://mastermovies.uk"
-      );
+      ctx.set("Access-Control-Allow-Origin", DOMAIN_REGEX.test(origin) ? origin : "https://mastermovies.uk");
     }
   };
 }

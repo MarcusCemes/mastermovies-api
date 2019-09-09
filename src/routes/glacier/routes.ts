@@ -1,20 +1,26 @@
 import { ApiRouter } from "../../typings/App";
 import { authorise } from "./controllers/authorise";
 import { endpoint } from "./controllers/endpoint";
+import { getExport } from "./controllers/getExport";
 import { getFilm } from "./controllers/getFilm";
+import { getThumbnail } from "./controllers/getThumbnail";
 import { listFilms } from "./controllers/listFilms";
-import { stream } from "./controllers/stream";
-import { thumbnail } from "./controllers/thumbnail";
+import { EType, stream } from "./controllers/stream";
 
 export function attachGlacierRoutes(router: ApiRouter) {
   router
     .get("/", endpoint)
+
+    // Object queries
     .get("/list", listFilms)
     .get("/film/:id", getFilm)
+    .get("/export/:id", getExport)
+    .get("/thumbnail/:id", getThumbnail)
 
+    // Auth functions
     .post("/authorise", authorise)
-    .get("/download/:id", ctx => stream(ctx, true))
-    .get("/stream/:id", ctx => stream(ctx, false))
 
-    .get("/thumbnail/:id", thumbnail);
+    // Binary streaming
+    .get("/stream/export/:id", ctx => stream(ctx, EType.EXPORT))
+    .get("/stream/thumbnail/:id", ctx => stream(ctx, EType.THUMBNAIL));
 }

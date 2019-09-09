@@ -20,7 +20,6 @@ interface IAuthorisationRequest {
 
 /** Authorise a download for a given film */
 export async function authorise(ctx: ApiContext) {
-
   ctx.cors = false; // Restrict auth to the MasterMovies domain
 
   // Validate the request payload

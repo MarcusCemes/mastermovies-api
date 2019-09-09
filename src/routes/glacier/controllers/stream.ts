@@ -1,79 +1,135 @@
-import { constants, promises } from "fs";
-import { join, relative } from "path";
-import send from "send";
+import { join } from "path";
 
 import { GlacierConfig } from "../../../config/glacier";
 import { logger } from "../../../lib/logger";
 import { HTTP_CODES } from "../../../middleware/respond";
 import { Export } from "../../../models/export";
+import { Thumbnail } from "../../../models/thumbnail";
 import { ApiContext } from "../../../typings/App";
+import { streamFile } from "../lib/streamFile";
 
-export async function stream(ctx: ApiContext, download: boolean) {
-  // Validate parameters
-  if (isNaN(ctx.params.id)) {
-    ctx.standard(HTTP_CODES.BAD_REQUEST, "export id must be a number");
-    return;
-  }
+/** Supported resource types */
+export const enum EType {
+  EXPORT = 0,
+  THUMBNAIL = 1
+}
 
-  const session = await ctx.getSession();
-  const exportId = ctx.params.id;
+const AUTH_REQUIRED: { [key in EType]: boolean } = {
+  [EType.EXPORT]: true,
+  [EType.THUMBNAIL]: false
+};
 
-  // Check if any authorisations are present
-  if (typeof session.glacier !== "object" || typeof session.glacier.authorisations !== "object") {
-    ctx.standard(HTTP_CODES.UNAUTHORIZED);
-    return;
-  }
+/** Serve binary streaming of Thumbnail and Export resources */
+export async function stream(ctx: ApiContext, type: EType) {
+  // Validate the request and generate basic info
+  const validatedRequest = validateRequest(ctx, type);
+  if (validatedRequest == null) return;
+  const { id, authRequired } = validatedRequest;
 
-  // Get the associated film and check for valid authorisation
-  const exp = ((await Export.query()
-    .findById(exportId)
-    .select("filename", "mime", "film.id as filmId")
-    .joinRelation("film")
-    .first()) as unknown) as { filename: string; mime: string; filmId: number };
-
-  if (!exp) {
+  // Check existence and get basic meta from database
+  const typeMeta = await getTypeMeta(type, id);
+  if (!typeMeta) {
     ctx.standard(HTTP_CODES.NOT_FOUND);
     return;
   }
+  const { mime, filename, filmId } = typeMeta;
 
-  const expiry = session.glacier.authorisations[exp.filmId];
-  if (typeof expiry !== "number" || expiry < Math.floor(Date.now() / 1000)) {
-    ctx.standard(HTTP_CODES.UNAUTHORIZED);
-    return;
+  // Check authorisation
+  if (authRequired) {
+    const authorised = await verifyAuth(ctx, type, filmId);
+    if (!authorised) return;
   }
 
-  // Build file path
-  const root = GlacierConfig.get("contentPath");
-  const dl = join(root, "films", exp.filmId.toString(), "exports", exportId.toString());
+  // Generate path and stream it!
+  const path = generatePath(type, id, filmId);
+  const shouldDownload = typeof ctx.query.download !== "undefined";
 
-  // Check it's located within the root directory
-  if (relative(root, dl).substr(0, 1) === ".") {
-    logger.error({
-      message: "[GLACIER] Glacier content path was not considered safe!",
-      rootDir: root,
-      contentPath: dl
-    });
-    throw new Error("Unsafe glacier content path");
+  return streamFile(ctx, path, mime, shouldDownload ? filename : void 0);
+}
+
+/** Validate type and return auth requirement */
+function validateRequest(ctx: ApiContext, type: EType): { authRequired: boolean; id: number } | null {
+  if (isNaN(ctx.params.id)) {
+    ctx.standard(HTTP_CODES.BAD_REQUEST, '"id" must be a number');
+    return null;
   }
 
-  // Check if the file exists
-  try {
-    await promises.access(dl, constants.F_OK);
-  } catch (err) {
-    logger.error({ msg: "[GLACIER] Could not access file", contentPath: dl, filmId: exp.filmId, exportId, err });
-    throw new Error("Could not locate glacier content");
+  const authRequired = AUTH_REQUIRED[type];
+  if (typeof authRequired !== "boolean") throw new Error("Could not find authorisation requirement for type " + type);
+
+  return {
+    id: parseInt(ctx.params.id, 10),
+    authRequired
+  };
+}
+
+/** Verify authorisation of a resource */
+async function verifyAuth(ctx: ApiContext, type: EType, filmId: number): Promise<boolean> {
+  const session = await ctx.getSession();
+
+  // Verify authorisation
+  let authorised = false;
+  switch (type) {
+    case EType.EXPORT:
+      if (typeof session.glacier === "object" && typeof session.glacier.authorisations === "object") {
+        const expiry = session.glacier.authorisations[filmId];
+        if (typeof expiry === "number" && expiry >= Date.now() / 1000) {
+          authorised = true;
+        }
+      }
+      break;
   }
 
-  ctx.set("Content-Type", exp.mime);
-  if (download) {
-    ctx.set("Content-Disposition", ` attachment; filename=${exp.filename}`);
+  if (authorised) {
+    return true;
   }
 
-  ctx.body = send(ctx.req, dl, {
-    acceptRanges: true,
-    cacheControl: false,
-    index: false,
-    dotfiles: "deny",
-    lastModified: false
+  ctx.standard(HTTP_CODES.UNAUTHORIZED);
+  return false;
+}
+
+/** Retrieve some metadata from the database */
+async function getTypeMeta(
+  type: EType,
+  id: number
+): Promise<{
+  filmId: number;
+  mime?: string;
+  filename?: string;
+} | null> {
+  switch (type) {
+    case EType.EXPORT:
+      return (Export.query()
+        .findById(id)
+        .select("filename", "mime", "film_id as filmId")
+        .first() as unknown) as { filename: string; mime: string; filmId: number };
+
+    case EType.THUMBNAIL:
+      return (Thumbnail.query()
+        .findById(id)
+        .select("mime", "film_id as filmId")
+        .first() as unknown) as { mime?: string; filmId: number };
+  }
+
+  return null;
+}
+
+/** Generate the content path on disk */
+function generatePath(type: EType, id: number, filmId: number): string {
+  const ROOT = GlacierConfig.get("contentPath");
+
+  switch (type) {
+    case EType.EXPORT:
+      return join(ROOT, "films", filmId.toString(), "exports", id.toString());
+    case EType.THUMBNAIL:
+      return join(ROOT, "films", filmId.toString(), "thumbs", id.toString());
+  }
+
+  logger.error({
+    msg: "Failed to generate path",
+    filmId,
+    id,
+    type
   });
+  throw new Error("Failed to generate glacier content path");
 }
