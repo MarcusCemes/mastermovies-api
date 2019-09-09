@@ -50,7 +50,8 @@ function attachMainRoutes(router: ApiRouter) {
         status: "active"
       };
     })
-    .get(BASE_PATH + "/openapi.json", async ctx => {
+    .get(BASE_PATH + "/openapi.json", async ctx => { // TODO seperate into different file
+      ctx.cache = 3600;
       ctx.body = createReadStream(join(__dirname, "../../assets/openapi.json")).pipe(new PassThrough());
     });
 }

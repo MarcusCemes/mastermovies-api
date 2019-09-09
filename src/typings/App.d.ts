@@ -38,9 +38,15 @@ interface ApiContext extends Context {
 
   /**
    * Set cache duration of the resource. Can be a `ms` compatible string, number of seconds or null
-   * for no cache.
+   * for no cache. (default: null)
    */
   cache: string | number | null;
+
+  /**
+   * Set how forgiving CORS response headers are. When set to true, any client may access. When set
+   * to false, the client will be restricted to the MasterMovies domain. (default: true)
+   */
+  cors: boolean;
 }
 
 export type ApiRouter = Router<ApiState, ApiContext>;

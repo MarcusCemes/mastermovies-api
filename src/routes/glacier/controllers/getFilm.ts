@@ -3,7 +3,7 @@ import { Film } from "../../../models/film";
 import { ApiContext } from "../../../typings/App";
 
 export async function getFilm(ctx: ApiContext) {
-  ctx.cache = "1 hour";
+  ctx.cache = 600;
 
   // Validate parameters
   if (isNaN(ctx.params.id)) {
@@ -14,7 +14,6 @@ export async function getFilm(ctx: ApiContext) {
   // Load the film from the database
   const film = await Film.query()
     .findById(ctx.params.id)
-    .eager("thumbnails")
     .eager("[thumbnails, exports]");
   if (film) {
     ctx.body.data = film;

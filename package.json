@@ -2,7 +2,7 @@
   "name": "mastermovies-api",
   "private": true,
   "description": "The MasterMovies Node.js API",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "author": "Marcus Cemes <marcus.cemes@gmail.com>",
   "dependencies": {
     "@hapi/joi": "^15.1.1",

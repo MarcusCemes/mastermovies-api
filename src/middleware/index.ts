@@ -4,6 +4,7 @@ import koaHelmet from "koa-helmet";
 import { logger } from "../lib/logger";
 import { ApiApp } from "../typings/App";
 import { cacheMiddleware } from "./cache";
+import { corsMiddleware } from "./cors";
 import { csrfMiddleware } from "./csrf";
 import { databaseMiddleware } from "./database";
 import { errorHandler } from "./errorHandler";
@@ -13,6 +14,7 @@ import { respondMiddleware } from "./respond";
 import { sessionMiddleware } from "./session";
 
 const MIDDLEWARE = [
+  corsMiddleware,
   respondMiddleware, // add ctx methods
   errorHandler,
   () => koaHelmet({ hsts: false }),

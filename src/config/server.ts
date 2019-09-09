@@ -18,5 +18,11 @@ export const ServerConfig = createConfig("ServerConfig", {
     format: Number,
     default: 3000,
     env: "SERVER_PORT"
+  },
+  proxy: {
+    doc: "Whether to trust reverse proxy headers. Must be set correctly!",
+    format: Boolean,
+    default: true,
+    env: "SERVER_PROXY"
   }
 });
