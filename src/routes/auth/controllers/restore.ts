@@ -9,5 +9,5 @@ export async function restore(ctx: ApiContext) {
 
   ctx.body = {
     token: oldSession && nonce && (await verifyJwt(oldSession, AuthConfig.get("jwtSecret"), nonce)) ? oldSession : null
-  }
+  };
 }

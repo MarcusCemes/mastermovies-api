@@ -8,6 +8,7 @@ import { corsMiddleware } from "./cors";
 import { csrfMiddleware } from "./csrf";
 import { databaseMiddleware } from "./database";
 import { errorHandler } from "./errorHandler";
+import { notFoundHandler } from "./notFoundHandler";
 import { rateLimitMiddleware } from "./rateLimit";
 import { respondMiddleware } from "./respond";
 import { sessionMiddleware } from "./session";
@@ -18,6 +19,7 @@ const MIDDLEWARE = [
   errorHandler,
   () => koaHelmet({ hsts: false }),
   rateLimitMiddleware,
+  notFoundHandler,
   cacheMiddleware,
   bodyParser,
   csrfMiddleware,
