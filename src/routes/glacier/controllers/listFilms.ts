@@ -7,5 +7,5 @@ export async function listFilms(ctx: ApiContext) {
   const query = Film.query().columns(["id", "name", "release"]);
   if (typeof ctx.request.query.public !== "undefined") query.where("public", true);
 
-  ctx.body.data = await query;
+  ctx.body = { data: await query };
 }

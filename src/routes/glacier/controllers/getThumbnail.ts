@@ -21,7 +21,7 @@ export async function getThumbnail(ctx: ApiContext) {
 
   const thumb = await query;
   if (thumb) {
-    ctx.body.data = thumb;
+    ctx.body = { data: thumb };
   } else {
     ctx.standard(HTTP_CODES.NOT_FOUND);
   }

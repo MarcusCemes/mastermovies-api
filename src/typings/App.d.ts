@@ -1,7 +1,5 @@
 import Router from "@koa/router";
-import Knex from "knex";
 import Koa, { Context } from "koa";
-import {} from "ms";
 
 interface BasicJwtProperties {
   iat?: number;
@@ -44,10 +42,10 @@ interface ApiContext extends Context {
   cache: string | number | null;
 
   /**
-   * Set how forgiving CORS response headers are. When set to true, any client may access. When set
-   * to false, the client will be restricted to the MasterMovies domain. (default: true)
+   * Set the original restriction level of CORS. When set to try, only MasterMovies origins are permitted. If false,
+   * any origin is permitted. (default: false)
    */
-  cors: boolean;
+  strictCors: boolean;
 }
 
 export type ApiRouter = Router<ApiState, ApiContext>;

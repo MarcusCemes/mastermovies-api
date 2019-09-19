@@ -14,6 +14,8 @@ export interface IFilm {
   location?: string;
   copyright?: string;
   crew?: { [index: string]: string };
+  views?: number;
+  runtime?: number;
 }
 
 export class Film extends Model {
@@ -31,6 +33,8 @@ export class Film extends Model {
   public location?: string;
   public copyright?: string;
   public crew?: { [index: string]: string };
+  public views?: number;
+  public runtime?: number;
 
   public keys?: Key[];
   public groups?: Group[];

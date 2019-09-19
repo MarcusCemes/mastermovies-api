@@ -21,7 +21,7 @@ export async function getExport(ctx: ApiContext) {
 
   const exp = await query;
   if (exp) {
-    ctx.body.data = exp;
+    ctx.body = { data: exp };
   } else {
     ctx.standard(HTTP_CODES.NOT_FOUND);
   }

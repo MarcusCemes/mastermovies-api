@@ -7,6 +7,7 @@ export async function restore(ctx: ApiContext) {
   const oldSession = ctx.cookies.get(AuthConfig.get("cookie"));
   const nonce = ctx.cookies.get(AuthConfig.get("nonceCookie"));
 
-  ctx.body.data =
-    oldSession && nonce && (await verifyJwt(oldSession, AuthConfig.get("jwtSecret"), nonce)) ? oldSession : {};
+  ctx.body = {
+    token: oldSession && nonce && (await verifyJwt(oldSession, AuthConfig.get("jwtSecret"), nonce)) ? oldSession : null
+  }
 }

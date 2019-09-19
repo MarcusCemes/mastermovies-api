@@ -39,13 +39,12 @@ export async function createAppRouter(): Promise<ApiRouter> {
 }
 
 function attachMainRoutes(router: ApiRouter) {
-  router.get("/", async ctx => {
-    ctx.redirect(BASE_PATH);
-  });
   router
+    .get("/", async ctx => {
+      ctx.redirect(BASE_PATH);
+    })
     .get(BASE_PATH, async ctx => {
       ctx.body = {
-        ...ctx.body,
         message: "MasterMovies API",
         status: "active"
       };

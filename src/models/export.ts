@@ -12,6 +12,7 @@ export interface IExport {
   videoCodec?: string;
   audioCodec?: string;
   checksum?: { [index: string]: string };
+  bitrate?: number;
 }
 
 export class Export extends Model {
@@ -30,6 +31,7 @@ export class Export extends Model {
   public videoCodec?: string;
   public audioCodec?: string;
   public checksum?: { [index: string]: string };
+  public bitrate?: number;
 
   public film?: Film;
 

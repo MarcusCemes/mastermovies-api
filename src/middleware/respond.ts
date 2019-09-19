@@ -15,7 +15,7 @@ export enum HTTP_CODES {
 
 /** Injects ctx with a JSON status response */
 export function respondMiddleware() {
-  return async (ctx: Context, next: () => void) => {
+  return async (ctx: Context, next: () => Promise<void>) => {
     ctx.standard = (code: number, message?: string, additional?: { [index: string]: any }) => {
       ctx.status = code;
       ctx.body = {
@@ -26,9 +26,6 @@ export function respondMiddleware() {
         ...additional
       };
     };
-
-    // Create a JSON response by default
-    ctx.body = {};
 
     await next();
   };

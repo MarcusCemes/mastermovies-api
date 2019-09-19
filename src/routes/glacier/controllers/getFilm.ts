@@ -16,7 +16,7 @@ export async function getFilm(ctx: ApiContext) {
     .findById(ctx.params.id)
     .eager("[thumbnails, exports]");
   if (film) {
-    ctx.body.data = film;
+    ctx.body = { data: film };
   } else {
     ctx.standard(HTTP_CODES.NOT_FOUND);
   }

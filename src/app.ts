@@ -18,7 +18,7 @@ export async function createApp(): Promise<ApiApp> {
   }
 
   // Add low-level middleware
-  await registerMiddleware(app);
+  registerMiddleware(app);
 
   // Add routing
   const appRouter = await createAppRouter();
