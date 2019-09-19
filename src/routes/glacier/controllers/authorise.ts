@@ -128,18 +128,19 @@ async function checkAuthorisation(film: number, key: string): Promise<AUTH_RESUL
 
 async function logAuthorisation(filmId: number, keyValue: string, ip: string, authResult: AUTH_RESULT) {
   try {
-    // const key = await Key.query().select("id").findOne("value", keyValue);
+    const key = await Key.query()
+      .select("id")
+      .findOne("value", keyValue);
     await LogAuth.query().insertGraph(
-        {
-          success: authResult === AUTH_RESULT.OK,
-          ip,
-          film: {
-            id: filmId
-          },
-          key: {
-            value: keyValue
-          }
-        }, { relate: true }
+      {
+        success: authResult === AUTH_RESULT.OK,
+        ip,
+        film: {
+          id: filmId
+        },
+        key: key || null
+      },
+      { relate: true }
     );
   } catch (err) {
     logger.error({ msg: "[GLACIER] Unable to log authorisation", err });
