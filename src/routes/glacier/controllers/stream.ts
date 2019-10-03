@@ -1,11 +1,12 @@
 import { join } from "path";
 
-import { GlacierConfig } from "../../../config/glacier";
+import { Config } from "../../../config";
+import { verifyJwt } from "../../../lib/jsonWebToken";
 import { logger } from "../../../lib/logger";
 import { HTTP_CODES } from "../../../middleware/respond";
 import { Export } from "../../../models/export";
 import { Thumbnail } from "../../../models/thumbnail";
-import { ApiContext } from "../../../typings/App";
+import { IApiContext } from "../../../types/App";
 import { streamFile } from "../lib/streamFile";
 
 /** Supported resource types */
@@ -20,7 +21,7 @@ const AUTH_REQUIRED: { [key in EType]: boolean } = {
 };
 
 /** Serve binary streaming of Thumbnail and Export resources */
-export async function stream(ctx: ApiContext, type: EType) {
+export async function stream(ctx: IApiContext, type: EType) {
   // Validate the request and generate basic info
   const validatedRequest = validateRequest(ctx, type);
   if (validatedRequest == null) return;
@@ -48,7 +49,7 @@ export async function stream(ctx: ApiContext, type: EType) {
 }
 
 /** Validate type and return auth requirement */
-function validateRequest(ctx: ApiContext, type: EType): { authRequired: boolean; id: number } | null {
+function validateRequest(ctx: IApiContext, type: EType): { authRequired: boolean; id: number } | null {
   if (isNaN(ctx.params.id)) {
     ctx.standard(HTTP_CODES.BAD_REQUEST, '"id" must be a number');
     return null;
@@ -64,17 +65,17 @@ function validateRequest(ctx: ApiContext, type: EType): { authRequired: boolean;
 }
 
 /** Verify authorisation of a resource */
-async function verifyAuth(ctx: ApiContext, type: EType, filmId: number): Promise<boolean> {
-  const session = await ctx.getSession();
-
+async function verifyAuth(ctx: IApiContext, type: EType, filmId: number): Promise<boolean> {
   // Verify authorisation
   let authorised = false;
   switch (type) {
     case EType.EXPORT:
-      if (typeof session.glacier === "object" && typeof session.glacier.authorisations === "object") {
-        const expiry = session.glacier.authorisations[filmId];
-        if (typeof expiry === "number" && expiry >= Date.now() / 1000) {
-          authorised = true;
+      const token: unknown = ctx.query.authorisation;
+      if (typeof token === "string") {
+        const secret = Config.get("glacier").auth.download.secret;
+        const payload = verifyJwt(token, secret) as { resourceId: number };
+        if (payload) {
+          if (payload.resourceId === filmId) authorised = true;
         }
       }
       break;
@@ -116,13 +117,13 @@ async function getTypeMeta(
 
 /** Generate the content path on disk */
 function generatePath(type: EType, id: number, filmId: number): string {
-  const ROOT = GlacierConfig.get("contentPath");
+  const ROOT = Config.get("glacier").path;
 
   switch (type) {
     case EType.EXPORT:
-      return join(ROOT, "films", filmId.toString(), "exports", id.toString());
+      return join(ROOT, "exports", id.toString());
     case EType.THUMBNAIL:
-      return join(ROOT, "films", filmId.toString(), "thumbs", id.toString());
+      return join(ROOT, "thumbs", id.toString());
   }
 
   logger.error({

@@ -1,123 +1,151 @@
-import nanoid from "nanoid";
+import { createHash, randomBytes } from "crypto";
+import { promisify } from "util";
 
-import { AuthConfig } from "../config/auth";
-import { ServerConfig } from "../config/server";
-import { BASE_PATH } from "../lib/createAppRouter";
+import { Config } from "../config";
 import { signJwt, verifyJwt } from "../lib/jsonWebToken";
-import { ApiContext, ApiSession } from "../typings/App";
+import { IApiContext, IApiSession } from "../types/App";
 
-const resolvedSession = Symbol("resolvedSession");
+const HASH_ALGORITHM = "blake2b512";
 
-const SECURE_COOKIE_OPTIONS = {
-  secure: ServerConfig.get("env") === "production",
+const JTI_SECRET_BYTES = 12;
+const JTI_HASH_BYTES = 12;
+
+const COOKIE_OPTIONS = {
+  overwrite: true,
+  maxAge: Math.floor(Config.get("auth").jwt.lifetime * 1000),
   httpOnly: true,
-  domain: ServerConfig.get("env") === "production" ? "api.mastermovies.uk" : void 0,
-  overwrite: true
+  secure: Config.get("env") === "production"
 };
 
-const SESSION_COOKIE_OPTIONS = {
-  ...SECURE_COOKIE_OPTIONS,
-  path: BASE_PATH + "/auth/"
-};
+const BASE64_REGEX = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
 
 /** Session handling, extension of the Auth endpoint */
 export function sessionMiddleware() {
-  // Return a middleware function
-  return async (ctx: ApiContext, next: () => Promise<void>) => {
-    // Attach a getSession method to the context
-    ctx.getSession = () => getSession(ctx);
+  return async (ctx: IApiContext, next: () => Promise<void>) => {
+    let modified = false;
+    let session: IApiSession;
 
-    // Attach a setSession method to the context
-    let sessionUpdate = false;
-    let newSession = null;
+    ctx.session = {
+      get: () => {
+        if (typeof session !== "undefined") return session;
+        return (session = deepFreeze(getSession(ctx)));
+      },
 
-    ctx.setSession = (x: ApiSession | null) => {
-      sessionUpdate = true;
-      newSession = x;
-      // Update the cached session for future getSession
-      ctx.state[resolvedSession] = x;
+      set: (newSession: IApiSession) => {
+        session = deepFreeze(newSession);
+        modified = true;
+      }
     };
 
     await next();
 
-    // Send the new JWT back to the client
-    if (sessionUpdate) {
-      if (newSession === null) {
+    // Update the session
+    if (modified) {
+      if (session === null) {
         destroySession(ctx);
       } else {
-        await saveSession(ctx, newSession);
+        await setSession(ctx, session);
       }
     }
   };
 }
 
-/** Verify and decode the JWT session. Caches the operation/result. */
-async function getSession(ctx: ApiContext): Promise<ApiSession> {
-  const secret = AuthConfig.get("jwtSecret");
+/** Returns a valid session, or starts a new one */
+function getSession(ctx: IApiContext): IApiSession {
+  const { secret, jtiCookie } = Config.get("auth").jwt;
 
-  // Check if a nonce can be found (required)
-  const nonce = ctx.cookies.get(AuthConfig.get("nonceCookie"));
-  if (!nonce) return {};
+  // Get the Session ID and generate it's hash which must match the JWT's ID
+  const jtiSecret = ctx.cookies.get(jtiCookie);
+  if (!jtiSecret) return {};
+
+  const jtiHash = BASE64_REGEX.test(jtiSecret)
+    ? createHash(HASH_ALGORITHM)
+        .update(Buffer.from(jtiSecret, "base64"))
+        .digest()
+        .toString("base64", 0, JTI_HASH_BYTES)
+    : null;
 
   // Extract bearer token
-  let token = null;
-  const tokenHeader = ctx.request.header.authorization;
-  if (typeof tokenHeader === "string" && tokenHeader.substring(0, 7) === "Bearer ") {
-    token = tokenHeader.substring(7);
-  }
+  const rawToken = ctx.request.header.authorization;
 
-  // Verify and decode token if present
+  const token: string =
+    typeof rawToken === "string" && rawToken.substring(0, 7) === "Bearer " ? rawToken.substring(7) : null;
+
   if (token !== null) {
-    // If the session is being decoded (or has been), return the original Promise
-    if (ctx.state[resolvedSession]) {
-      return ctx.state[resolvedSession];
-    } else {
-      // Start verifying and decoding the session as a Promise
-      const sessionPromise = (async () => {
-        const verifiedJwt = await verifyJwt<ApiSession>(token, secret, nonce);
+    const payload = verifyJwt(token, secret, jtiHash);
 
-        if (verifiedJwt !== false) {
-          return verifiedJwt;
-        } else {
-          return {};
-        }
-      })();
-
-      // Cache the decoded token only if it hasn't already been set
-      if (!ctx.state[resolvedSession]) ctx.state[resolvedSession] = sessionPromise;
-
-      return ctx.state[resolvedSession];
+    if (payload !== false) {
+      return payload;
     }
   }
+
   return {};
 }
 
-async function saveSession(ctx: ApiContext, session: ApiSession) {
-  const secret = AuthConfig.get("jwtSecret");
+const randomBytesAsync = promisify(randomBytes);
+/** Signs the session and deploys the required cookies/body parameters */
+async function setSession(ctx: IApiContext, session: IApiSession) {
+  const { secret, archiveCookie, jtiCookie, lifetime } = Config.get("auth").jwt;
 
-  // Generate a new nonce
-  const newNonce = nanoid();
-  const lifetime = AuthConfig.get("lifetime");
+  // Generate a unique ID and hash
+  const jtiSecret = (await randomBytesAsync(JTI_SECRET_BYTES)).slice(0, JTI_SECRET_BYTES);
+  const jtiHash = createHash(HASH_ALGORITHM)
+    .update(jtiSecret)
+    .digest()
+    .toString("base64", 0, JTI_HASH_BYTES);
 
-  const signedJwt = await signJwt(session, secret, lifetime, newNonce);
+  const signedSession = await signJwt(session, secret, lifetime, jtiHash);
 
   // Return the signed JWT in the response payload
-  ctx.body.token = signedJwt;
+  if (typeof ctx.body === "object" && ctx.body !== null) {
+    ctx.body.token = signedSession;
+  } else {
+    ctx.body = {
+      token: signedSession
+    };
+  }
 
-  // Send the nonce to client as a secure cookie
-  ctx.cookies.set(AuthConfig.get("nonceCookie"), newNonce, {
-    ...SECURE_COOKIE_OPTIONS,
-    maxAge: Math.floor(lifetime * 1000)
-  });
+  // Set the jti secret as a HTTP-Only cookie
+  ctx.cookies.set(jtiCookie, jtiSecret.toString("base64"), COOKIE_OPTIONS);
 
   // Save an archived JWT for future retrieval
-  ctx.cookies.set(AuthConfig.get("cookie"), signedJwt, {
-    ...SESSION_COOKIE_OPTIONS,
-    maxAge: Math.floor(lifetime * 1000)
+  ctx.cookies.set(archiveCookie, signedSession, {
+    ...COOKIE_OPTIONS,
+    path: "/v2/auth/"
   });
 }
 
-function destroySession(ctx: ApiContext): void {
-  ctx.cookies.set(AuthConfig.get("nonceCookie"), null, SECURE_COOKIE_OPTIONS);
-  ctx.cookies.set(AuthConfig.get("cookie"), null, SESSION_COOKIE_OPTIONS);
+/** Remove any session related cookies */
+function destroySession(ctx: IApiContext): void {
+  const { jtiCookie, archiveCookie } = Config.get("auth").jwt;
+  ctx.cookies.set(jtiCookie, void 0, { ...COOKIE_OPTIONS, maxAge: void 0 });
+  ctx.cookies.set(archiveCookie, void 0, { ...COOKIE_OPTIONS, maxAge: void 0, path: "/v2/auth" });
+
+  if (typeof ctx.body === "object" && ctx.body !== null) {
+    ctx.body.token = null;
+  } else {
+    ctx.body = {
+      token: null
+    };
+  }
+}
+
+/** https://github.com/substack/deep-freeze */
+function deepFreeze<T extends object>(object: T): T {
+  if (typeof object !== "object" || object === null) return object;
+
+  Object.freeze(object);
+
+  Object.getOwnPropertyNames(object).forEach(prop => {
+    if (
+      object.hasOwnProperty(prop) &&
+      object[prop] !== null &&
+      (typeof object[prop] === "object" || typeof object[prop] === "function") &&
+      !Object.isFrozen(object[prop])
+    ) {
+      deepFreeze(object[prop]);
+    }
+  });
+
+  return object;
 }

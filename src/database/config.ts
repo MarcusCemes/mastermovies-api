@@ -1,10 +1,10 @@
 import { Config } from "knex";
 
-import { DatabaseConfig } from "../config/database";
+import * as AppConfig from "../config";
 
 /** Returns various Knex environments */
 export function getKnexOptions(): { development: Config; production: Config } {
-  const { host, database, devDatabase, user, password, poolMax } = DatabaseConfig.getProperties();
+  const { host, productionDb, developmentDb, user, password, poolMax } = AppConfig.Config.get("database");
 
   const baseOptions: Config = {
     client: "pg",
@@ -20,7 +20,7 @@ export function getKnexOptions(): { development: Config; production: Config } {
     },
     migrations: {
       directory: "build/database/migrations",
-      tableName: "knex_migrations",
+      tableName: "glacier_knex_migrations",
       loadExtensions: [".js"]
     },
     seeds: {
@@ -35,7 +35,7 @@ export function getKnexOptions(): { development: Config; production: Config } {
       ...baseOptions,
       connection: {
         ...(baseOptions.connection as object),
-        database: devDatabase
+        database: developmentDb
       }
     },
 
@@ -43,7 +43,7 @@ export function getKnexOptions(): { development: Config; production: Config } {
       ...baseOptions,
       connection: {
         ...(baseOptions.connection as object),
-        database
+        database: productionDb
       }
     }
   };

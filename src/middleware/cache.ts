@@ -1,10 +1,10 @@
 import ms from "ms";
 
-import { ApiContext } from "../typings/App";
+import { IApiContext } from "../types/App";
 
 /** Extend the ctx object, and apply appropriate cache headers */
 export function cacheMiddleware() {
-  return async (ctx: ApiContext, next: () => void) => {
+  return async (ctx: IApiContext, next: () => Promise<void>) => {
     ctx.cache = null;
 
     await next();

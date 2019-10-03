@@ -1,36 +1,41 @@
-import assert from "assert";
+import { Schema } from "convict";
+import { randomBytes } from "crypto";
 
-import { createConfig } from "./utils";
-
-export const AuthConfig = createConfig("AuthConfig", {
-  jwtSecret: {
-    doc: "The secret used to sign JWT (128 hexadecimal digits)",
-    format: secretValidator,
-    default: "",
-    env: "SESSION_JWT_SECRET"
-  },
-  lifetime: {
-    doc: "The session lifetime/duration (seconds)",
-    format: Number,
-    default: 86400,
-    env: "SESSION_LIFETIME"
-  },
-  cookie: {
-    doc: "The name of the cookie where the session is archived",
-    format: String,
-    default: "Session",
-    env: "SESSION_COOKIE"
-  },
-  nonceCookie: {
-    doc: "The name of the nonce cookie used to secure the JWT",
-    format: String,
-    default: "SessionID",
-    env: "SESSION_NONCE_COOKIE"
-  }
-});
-
-function secretValidator(x: any) {
-  assert(typeof x === "string", "Secret must be a string");
-  assert(x.length === 128, "Secret too short (512 bits)");
-  assert(/[0-9a-f]+/.test(x), "Secret must be encoded as hexadecimal");
+export interface IAuthConfig {
+  jwt: {
+    secret: Buffer;
+    lifetime: number;
+    archiveCookie: string;
+    jtiCookie: string;
+  };
 }
+
+export const AuthConfig: Schema<IAuthConfig> = {
+  jwt: {
+    secret: {
+      doc: "The secret used to sign JWT (64 bytes in hex or base64)",
+      format: "buffer64",
+      default: randomBytes(64),
+      env: "AUTH_JWT_SECRET",
+      sensitive: true
+    },
+    lifetime: {
+      doc: "The session lifetime/duration (seconds)",
+      format: "positiveInt",
+      default: 86400,
+      env: "AUTH_JWT_LIFETIME"
+    },
+    archiveCookie: {
+      doc: "The cookie where the session is archived",
+      format: String,
+      default: "MasterMoviesID Token",
+      env: "AUTH_JWT_ARCHIVE_COOKIE"
+    },
+    jtiCookie: {
+      doc: "The cookie that stores the session ID to prevent session hijacking",
+      format: String,
+      default: "MasterMoviesID",
+      env: "AUTH_JWT_JTI_COOKIE"
+    }
+  }
+};

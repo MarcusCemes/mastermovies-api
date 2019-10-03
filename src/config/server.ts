@@ -1,13 +1,13 @@
-import { createConfig } from "./utils";
+import { Schema } from "convict";
 
-export const ServerConfig = createConfig("ServerConfig", {
-  env: {
-    doc: "The application environment",
-    format: String,
-    default: "development",
-    env: "NODE_ENV"
-  },
-  ip: {
+export interface IServerConfig {
+  host: string;
+  port: number;
+  proxy: boolean;
+}
+
+export const ServerConfig: Schema<IServerConfig> = {
+  host: {
     doc: "The IP address to bind the server to",
     format: "ipaddress",
     default: "0.0.0.0",
@@ -20,9 +20,9 @@ export const ServerConfig = createConfig("ServerConfig", {
     env: "SERVER_PORT"
   },
   proxy: {
-    doc: "Whether to trust reverse proxy headers. Must be set correctly!",
+    doc: "Whether to trust reverse proxy headers",
     format: Boolean,
     default: true,
     env: "SERVER_PROXY"
   }
-});
+};

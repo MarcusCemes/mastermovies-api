@@ -1,4 +1,4 @@
-import { ApiRouter } from "../../typings/App";
+import { TApiRouter } from "../../types/App";
 import { authorise } from "./controllers/authorise";
 import { endpoint } from "./controllers/endpoint";
 import { getExport } from "./controllers/getExport";
@@ -7,7 +7,7 @@ import { getThumbnail } from "./controllers/getThumbnail";
 import { listFilms } from "./controllers/listFilms";
 import { EType, stream } from "./controllers/stream";
 
-export function attachGlacierRoutes(router: ApiRouter) {
+export function attachGlacierRoutes(router: TApiRouter) {
   router
     .get("/", endpoint)
 

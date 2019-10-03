@@ -1,7 +1,7 @@
 import Router from "@koa/router";
 import Koa, { Context } from "koa";
 
-interface BasicJwtProperties {
+export interface IBasicJwtProperties {
   iat?: number;
   exp?: number;
   aud?: string;
@@ -9,31 +9,27 @@ interface BasicJwtProperties {
 }
 
 /** A MasterMovies API session context */
-interface ApiSession extends BasicJwtProperties {
+export interface IApiSession extends IBasicJwtProperties {
   glacier?: {
     /** Contains expiry in UNIX seconds timestamp */
-    authorisations?: { [index: number]: number };
+    auth?: { [index: number]: number };
   };
 }
 
-/** Extended state used by the MasterMovies API */
-interface ApiState {
-  session: Promise<ApiSession>;
-}
+export interface IApiState {}
 
 /** Extended context used by the MasterMovies API */
-interface ApiContext extends Context {
+export interface IApiContext extends Context {
   /** Return a standard response based on a HTTP code */
   standard: (code: number, message?: string, additional?: { [index: string]: any }) => void;
 
-  /** Read the user session from an included JWT */
-  getSession: () => Promise<ApiSession>;
-
-  /**
-   * Update the user session. At the end of the request chain, the session will
-   * be signed as a JWT and added to the response body
-   */
-  setSession: (newSession: ApiSession) => void;
+  /** Used to interact with the API session */
+  session: {
+    /** Retrieve the cached API session */
+    get: () => IApiSession;
+    /** Update the cached session that will be signed and returned in the response */
+    set: (newSession: IApiSession) => void;
+  };
 
   /**
    * Set cache duration of the resource. Can be a `ms` compatible string, number of seconds or null
@@ -48,5 +44,5 @@ interface ApiContext extends Context {
   strictCors: boolean;
 }
 
-export type ApiRouter = Router<ApiState, ApiContext>;
-export type ApiApp = Koa<ApiState, ApiContext>;
+export type TApiRouter = Router<{}, IApiContext>;
+export type TApiApp = Koa<{}, IApiContext>;

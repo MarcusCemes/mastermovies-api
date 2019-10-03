@@ -1,7 +1,7 @@
 import Knex from "knex";
 import { Model } from "objection";
 
-import { ServerConfig } from "../config/server";
+import { Config } from "../config";
 import { logger } from "../lib/logger";
 import { getKnexOptions } from "./config";
 
@@ -15,18 +15,15 @@ export function getDatabase(): Knex {
 
 /** Initialise and test the database connection */
 function initDatabase(): Knex {
-  logger.debug("[DATABASE] Performing first time initialisation...");
+  logger.debug("[DATABASE] Initialising database connection...");
 
-  // Create the knex instance
-  let databaseEnvironment: "production" | "development";
-  if (ServerConfig.get("env") === "production") {
-    databaseEnvironment = "production";
-    logger.info("[DATABASE] Connected to PRODUCTION database");
-  } else {
-    databaseEnvironment = "development";
-  }
+  const databaseEnvironment = Config.get("env") === "production" ? "production" : "development";
+  const options: Knex.Config = getKnexOptions()[databaseEnvironment];
 
-  const newKnex = Knex(getKnexOptions()[databaseEnvironment]);
+  // @ts-ignore
+  logger.info(`[DATABASE] Connected to database "${options.connection.database}"`);
+
+  const newKnex = Knex(options);
 
   // Pass knex to Objection
   Model.knex(newKnex);

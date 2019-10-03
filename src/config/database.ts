@@ -1,41 +1,52 @@
-import { createConfig } from "./utils";
+import { Schema } from "convict";
 
-export const DatabaseConfig = createConfig("DatabaseConfig", {
+export interface IDatabaseConfig {
+  host: string;
+  port: number;
+  user: string;
+  password: string;
+  productionDb: string;
+  developmentDb: string;
+  poolMax: number;
+}
+
+export const DatabaseConfig: Schema<IDatabaseConfig> = {
   host: {
     doc: "The hostname of the Postgres server",
     format: String,
     default: "127.0.0.1",
-    env: "PGHOST"
+    env: "DATABASE_HOST"
   },
   port: {
     doc: "THe port of the Postgres server",
     format: "port",
     default: 5432,
-    env: "PGPORT"
+    env: "DATABASE_PORT"
   },
   user: {
     doc: "The username to use when connecting to Postgres",
     format: String,
     default: "node",
-    env: "PGUSERNAME"
+    env: "DATABASE_USER"
   },
   password: {
     doc: "The password to use when connecting to Postgres",
     format: String,
     default: "",
-    env: "PGPASSWORD"
+    env: "DATABASE_PASSWORD",
+    sensitive: true
   },
-  database: {
-    doc: "The database to use when connecting to Postgres",
+  productionDb: {
+    doc: "The production database to use when connecting to Postgres",
     format: String,
     default: "mastermovies",
-    env: "PGDATABASE"
+    env: "DATABASE_PRODUCTION_DB"
   },
-  devDatabase: {
-    doc: "The database to use when connecting to Postgres (non-production environment)",
+  developmentDb: {
+    doc: "The development database to use when connecting to Postgres",
     format: String,
     default: "mastermovies_dev",
-    env: "PGDATABASE_DEV"
+    env: "DATABASE_DEVELOPMENT_DB"
   },
   poolMax: {
     doc: "The maximum connection pool size",
@@ -43,4 +54,4 @@ export const DatabaseConfig = createConfig("DatabaseConfig", {
     default: 16,
     env: "DATABASE_POOL_MAX"
   }
-});
+};

@@ -1,8 +1,8 @@
 import { HTTP_CODES } from "../../../middleware/respond";
 import { Thumbnail } from "../../../models/thumbnail";
-import { ApiContext } from "../../../typings/App";
+import { IApiContext } from "../../../types/App";
 
-export async function getThumbnail(ctx: ApiContext) {
+export async function getThumbnail(ctx: IApiContext) {
   ctx.cache = 600;
 
   // Validate parameters

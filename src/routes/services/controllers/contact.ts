@@ -1,15 +1,16 @@
 import Joi from "@hapi/joi";
+import { randomBytes } from "crypto";
 import { promises } from "fs";
-import nanoid = require("nanoid");
 import { createTransport } from "nodemailer";
 import { join, resolve } from "path";
 import { RateLimiterMemory } from "rate-limiter-flexible";
+import { promisify } from "util";
 
-import { ServicesConfig } from "../../../config/services";
+import { Config } from "../../../config";
 import { logger } from "../../../lib/logger";
 import { inject } from "../../../lib/placeholder";
 import { HTTP_CODES } from "../../../middleware/respond";
-import { ApiContext } from "../../../typings/App";
+import { IApiContext } from "../../../types/App";
 
 const ASSETS_PATH = resolve(join(__dirname, "../../../../assets"));
 
@@ -30,15 +31,16 @@ export const contactLimiter = new RateLimiterMemory({
 const validEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 // Mail transporter
+const { useShell, host, port, user, password: pass } = Config.get("services").email.smtp;
 const transporter = createTransport(
-  ServicesConfig.get("smtpHost")
+  !useShell
     ? ({
-        host: ServicesConfig.get("smtpHost"),
-        port: ServicesConfig.get("smtpPort"),
+        host,
+        port,
         auth: {
           type: "login",
-          user: ServicesConfig.get("smtpUser"),
-          pass: ServicesConfig.get("smtpPass")
+          user,
+          pass
         }
       } as unknown)
     : {
@@ -56,7 +58,7 @@ interface IContactRequest {
 }
 
 /** Submit a contact form */
-export async function contact(ctx: ApiContext) {
+export async function contact(ctx: IApiContext) {
   // Validate the request payload
   const { value, error } = Joi.object()
     .keys({
@@ -87,13 +89,15 @@ export async function contact(ctx: ApiContext) {
   ctx.standard(HTTP_CODES.OK);
 }
 
-async function sendEmails(ctx: ApiContext, name: string, email: string, subject: string, message: string) {
+const randomBytesAsync = promisify(randomBytes);
+
+async function sendEmails(ctx: IApiContext, name: string, email: string, subject: string, message: string) {
   if (email && !validEmail.test(email)) {
     ctx.standard(HTTP_CODES.BAD_REQUEST, "Invalid client email");
     return;
   }
 
-  const ticket = nanoid();
+  const ticket = (await randomBytesAsync(12)).toString("base64");
 
   // Read each template from the filesystem
   const bodyTemplate = resolveAsset(TEMPLATE_PATHS.body);
@@ -101,6 +105,8 @@ async function sendEmails(ctx: ApiContext, name: string, email: string, subject:
   const operatorTextTemplate = resolveAsset(TEMPLATE_PATHS.operatorText);
   const clientTemplate = resolveAsset(TEMPLATE_PATHS.client);
   const clientTextTemplate = resolveAsset(TEMPLATE_PATHS.clientText);
+
+  const { system, operator } = Config.get("services").email.address;
 
   // Try to send the operator email
   try {
@@ -111,8 +117,8 @@ async function sendEmails(ctx: ApiContext, name: string, email: string, subject:
 
     // Errors will return a HTTP 500, informing the client to try again later
     await transporter.sendMail({
-      to: ServicesConfig.get("operatorEmail"),
-      from: ServicesConfig.get("systemEmail"),
+      to: operator,
+      from: system,
       subject: "🦉 An owl has been spotted!",
       references: `system+${ticket}@mastermovies.uk`,
       html,
@@ -134,7 +140,7 @@ async function sendEmails(ctx: ApiContext, name: string, email: string, subject:
     // Errors will return a HTTP 500, informing the client to try again later
     await transporter.sendMail({
       to: /^[a-zA-Z\u00C0-\u00FF\s]*$/.test(email) ? `${name} <${email}>` : email,
-      from: ServicesConfig.get("systemEmail"),
+      from: system,
       subject: "🦉 An owl has been spotted!",
       references: `system+${ticket}@mastermovies.uk`,
       html,
@@ -145,6 +151,6 @@ async function sendEmails(ctx: ApiContext, name: string, email: string, subject:
   }
 }
 
-function resolveAsset(path: string): Promise<string> {
+async function resolveAsset(path: string): Promise<string> {
   return promises.readFile(join(ASSETS_PATH, path)).then(v => v.toString());
 }

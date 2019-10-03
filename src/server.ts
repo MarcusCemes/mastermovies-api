@@ -2,7 +2,7 @@ import exitHook from "async-exit-hook";
 import { StoppableServer } from "stoppable";
 
 import { createApp } from "./app";
-import { ServerConfig } from "./config/server";
+import { Config } from "./config";
 import { getDatabase } from "./database";
 import { startServer } from "./lib/createServer";
 import { logger } from "./lib/logger";
@@ -11,24 +11,24 @@ import { logger } from "./lib/logger";
 export async function createServer() {
   logger.info("MasterMovies API v2");
 
-  warnEnvironment(ServerConfig.get("env"));
+  warnEnvironment(Config.get("env"));
 
-  const port = ServerConfig.get("port");
-  const ip = ServerConfig.get("ip");
+  const { host, port } = Config.get("server");
 
   const app = await createApp();
-  const server = await startServer(app, ip, port);
-  logger.info(`[SERVER] Listening on http://${ip}:${port}`);
+  const server = await startServer(app, host, port);
+  logger.info(`[SERVER] Listening on http://${host}:${port}`);
 
   registerShutdownHook(server);
 }
 
 function warnEnvironment(env: string) {
   if (env === "production") {
-    logger.info("Server running in PRODUCTION mode");
+    logger.info("⚠ Server running in PRODUCTION mode");
+    logger.info("⚠ Secure features are ENABLED, PRODUCTION database connected");
   } else {
-    logger.warn(`⚠ Enviroment is set to ${env.toUpperCase()} ⚠`);
-    logger.warn("API may be insecure. Connected to development database.");
+    logger.warn(`⚠ Environment is set to ${env.toUpperCase()}`);
+    logger.warn("⚠ Secure features are DISABLED, DEVELOPMENT database connected");
   }
 }
 

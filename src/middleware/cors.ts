@@ -1,11 +1,11 @@
-import { ServerConfig } from "../config/server";
-import { ApiContext } from "../typings/App";
+import { Config } from "../config";
+import { IApiContext } from "../types/App";
 
 const DOMAIN_REGEX = /^http[s]?:\/\/(?:[\.\-\_a-zA-Z0-9]*\.)?mastermovies\.uk$/;
 
 /** Apply the appropriate CORS headers. Certain safety features are disabled in non-production mode. */
 export function corsMiddleware() {
-  return async (ctx: ApiContext, next: () => Promise<void>) => {
+  return async (ctx: IApiContext, next: () => Promise<void>) => {
     const origin = ctx.get("Origin");
     ctx.strictCors = false;
 
@@ -18,7 +18,8 @@ export function corsMiddleware() {
 
     await next();
 
-    if (ctx.strictCors && ServerConfig.get("env") === "production") {
+    const production = Config.get("env") === "production";
+    if (ctx.strictCors && production) {
       ctx.set("Access-Control-Allow-Origin", DOMAIN_REGEX.test(origin) ? origin : "https://mastermovies.uk");
     }
   };

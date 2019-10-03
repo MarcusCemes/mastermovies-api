@@ -1,50 +1,49 @@
 import { sign, verify } from "jsonwebtoken";
 
-import { ApiSession } from "../typings/App";
+import { IBasicJwtProperties } from "../types/App";
 
+// Supported algorithms. The first index will be used for signing.
 const ALGORITHMS = ["HS256"];
 const AUDIENCE = "mastermovies";
 
 /**
- * Low level function to verify a JWT
+ * Low level function to verify a JWT using HMAC
  * @param {string} token The JWT token to verify
- * @param {string} secret A base64 encoded secret (64 bytes) for signature verification
+ * @param {Buffer} secret The secret to verify the JWT with
  * @param {string} jwtid A nonce to add to the JWT
  * @returns {object | false} The decoded JWT payload, or false on verification failure
  */
-export function verifyJwt<T extends object>(token: string, secret: string, jwtid?: string): Promise<T | false> {
-  return new Promise(resolve => {
-    verify(
-      token,
-      Buffer.from(secret, "base64"),
-      { algorithms: ALGORITHMS, audience: AUDIENCE, jwtid },
-      (err, decoded) => {
-        if (err || typeof decoded !== "object") {
-          resolve(false);
-          return;
-        }
-        resolve((decoded as unknown) as T);
-      }
-    );
-  });
+export function verifyJwt(token: string, secret: Buffer, jwtid?: string): object | false {
+  try {
+    const payload = verify(token, secret, { algorithms: ALGORITHMS, audience: AUDIENCE, jwtid });
+    if (typeof payload !== "object") return false;
+    return payload;
+  } catch (err) {
+    return false;
+  }
 }
 
 /**
- * Low level function to sign a JWT.
+ * Low level function to sign a JWT using HMAC
  * The payload will be stripped from old `exp`, `aud` and `jti`.
- * @param {ApiSession} payload The JWT payload
- * @param {string} secret A base64 encoded secret (64 bytes) for signature signing
+ * @param {object} payload The JWT payload
+ * @param {Buffer} secret The secret to sign the JWT with
  * @param {number} expiresIn The lifetime of the JWT in seconds
  * @param {string} jwtid An optional nonce to add to the JWT
  * @returns {string} The signed JWT token as a base64 encoded string
  * @throws {Error} If the signing process fails
  */
-export function signJwt(payload: ApiSession, secret: string, expiresIn: number, jwtid?: string): Promise<string> {
+export function signJwt<T extends IBasicJwtProperties>(
+  payload: T,
+  secret: Buffer,
+  expiresIn: number,
+  jwtid?: string
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const { exp, aud, jti, ...cleanPayload } = payload; // remove old metadata, causes errors
     sign(
       cleanPayload,
-      Buffer.from(secret, "base64"),
+      secret,
       {
         algorithm: ALGORITHMS[0],
         audience: AUDIENCE,

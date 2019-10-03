@@ -2,7 +2,7 @@ import bodyParser from "koa-bodyparser";
 import koaHelmet from "koa-helmet";
 
 import { logger } from "../lib/logger";
-import { ApiApp } from "../typings/App";
+import { TApiApp } from "../types/App";
 import { cacheMiddleware } from "./cache";
 import { corsMiddleware } from "./cors";
 import { csrfMiddleware } from "./csrf";
@@ -27,7 +27,7 @@ const MIDDLEWARE = [
   databaseMiddleware
 ];
 
-export function registerMiddleware(app: ApiApp) {
+export function registerMiddleware(app: TApiApp) {
   logger.debug(`[INIT] Preparing to register ${MIDDLEWARE.length} middleware`);
   for (const middleware of MIDDLEWARE) {
     app.use(middleware());

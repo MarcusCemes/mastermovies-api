@@ -30,6 +30,7 @@ export const up = (knex: Knex) =>
         table
           .integer("key_id")
           .unsigned()
+          .nullable()
           .references("id")
           .inTable("glacier.key");
         table.specificType("ip", "CIDR").notNullable();

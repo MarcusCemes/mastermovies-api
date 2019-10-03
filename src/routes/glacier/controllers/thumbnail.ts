@@ -2,13 +2,13 @@ import { constants, promises } from "fs";
 import { join, relative } from "path";
 import send from "send";
 
-import { GlacierConfig } from "../../../config/glacier";
+import { Config } from "../../../config";
 import { logger } from "../../../lib/logger";
 import { HTTP_CODES } from "../../../middleware/respond";
 import { Thumbnail } from "../../../models/thumbnail";
-import { ApiContext } from "../../../typings/App";
+import { IApiContext } from "../../../types/App";
 
-export async function thumbnail(ctx: ApiContext) {
+export async function thumbnail(ctx: IApiContext) {
   ctx.cache = "1 year";
 
   // Validate parameters
@@ -26,7 +26,7 @@ export async function thumbnail(ctx: ApiContext) {
   const filmId = thumb.film.id;
 
   // Build file path
-  const root = GlacierConfig.get("contentPath");
+  const root = Config.get("glacier").path;
   const dl = join(root, "films", filmId.toString(), "thumbs", thumbnailId.toString());
 
   // Check it's located within the root directory

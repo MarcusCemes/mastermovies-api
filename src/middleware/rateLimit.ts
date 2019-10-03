@@ -1,17 +1,18 @@
 import { RateLimiterMemory } from "rate-limiter-flexible";
 
-import { RateLimitConfig } from "../config/ratelimit";
-import { ApiContext } from "../typings/App";
+import { Config } from "../config";
+import { IApiContext } from "../types/App";
 import { HTTP_CODES } from "./respond";
 
 /** Handles low-overhead rate-limiting against DOS attacks */
 export function rateLimitMiddleware() {
+  const { points, duration } = Config.get("rateLimit");
   const RateLimiter = new RateLimiterMemory({
-    duration: RateLimitConfig.get("duration"),
-    points: RateLimitConfig.get("points")
+    duration,
+    points
   });
 
-  return async (ctx: ApiContext, next: () => Promise<void>) => {
+  return async (ctx: IApiContext, next: () => Promise<void>) => {
     try {
       const result = await RateLimiter.consume(ctx.ip);
 

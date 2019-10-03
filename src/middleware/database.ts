@@ -1,11 +1,11 @@
 import { getDatabase } from "../database";
-import { ApiContext } from "../typings/App";
+import { IApiContext } from "../types/App";
 
 /** Injects ctx with a JSON status response */
 export function databaseMiddleware() {
   const db = getDatabase();
 
-  return async (ctx: ApiContext, next: () => void) => {
+  return async (ctx: IApiContext, next: () => Promise<void>) => {
     ctx.db = db;
     await next();
   };

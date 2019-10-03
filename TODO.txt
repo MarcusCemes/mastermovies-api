@@ -1,0 +1,5 @@
+Warn if build version is old!
+Verify that queries are correct (e.g. .select(`${Key.tableName}.expiry`) );
+Test HEAD CSRF
+Switch to pino scope instead of [SCOPE]
+Differentiate between MasterMovies ID and Download Token (accept both in Glacier?)

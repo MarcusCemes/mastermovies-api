@@ -1,20 +1,21 @@
-import assert from "assert";
+import { Schema } from "convict";
 
-import { createConfig } from "./utils";
+export interface IRateLimitConfig {
+  points: number;
+  duration: number;
+}
 
-const POSITIVE_NUMBER = (x: any) => assert(typeof x === "number" && x >= 0);
-
-export const RateLimitConfig = createConfig("RateLimitConfig", {
+export const RateLimitConfig: Schema<IRateLimitConfig> = {
   points: {
     doc: "The number of points an IP is given",
-    format: POSITIVE_NUMBER,
-    default: 300,
+    format: "positiveInt",
+    default: 600,
     env: "RATE_LIMIT_POINTS"
   },
   duration: {
     doc: "The duration after which points reset",
-    format: POSITIVE_NUMBER,
+    format: "positiveInt",
     default: 60,
     env: "RATE_LIMIT_DURATION"
   }
-});
+};

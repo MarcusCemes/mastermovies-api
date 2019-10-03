@@ -1,8 +1,8 @@
 import { HTTP_CODES } from "../../../middleware/respond";
 import { Export } from "../../../models/export";
-import { ApiContext } from "../../../typings/App";
+import { IApiContext } from "../../../types/App";
 
-export async function getExport(ctx: ApiContext) {
+export async function getExport(ctx: IApiContext) {
   ctx.cache = 600;
 
   // Validate parameters

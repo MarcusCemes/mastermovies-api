@@ -2,14 +2,14 @@ import { constants, promises } from "fs";
 import { relative, resolve } from "path";
 import send from "send";
 
-import { GlacierConfig } from "../../../config/glacier";
+import { Config } from "../../../config";
 import { logger } from "../../../lib/logger";
-import { ApiContext } from "../../../typings/App";
+import { IApiContext } from "../../../types/App";
 
 /** Streams a file from the Glacier content directory */
-export async function streamFile(ctx: ApiContext, path: string, mime: string | null, download?: string) {
+export async function streamFile(ctx: IApiContext, path: string, mime: string | null, download?: string) {
   // Check whether the path is safe
-  const ROOT = GlacierConfig.get("contentPath");
+  const ROOT = Config.get("glacier").path;
   if (relative(ROOT, path).substr(0, 1) === ".") {
     logger.error({
       message: "[GLACIER] Glacier content path was not considered safe!",

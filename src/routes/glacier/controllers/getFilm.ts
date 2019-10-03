@@ -1,8 +1,8 @@
 import { HTTP_CODES } from "../../../middleware/respond";
 import { Film } from "../../../models/film";
-import { ApiContext } from "../../../typings/App";
+import { IApiContext } from "../../../types/App";
 
-export async function getFilm(ctx: ApiContext) {
+export async function getFilm(ctx: IApiContext) {
   ctx.cache = 600;
 
   // Validate parameters

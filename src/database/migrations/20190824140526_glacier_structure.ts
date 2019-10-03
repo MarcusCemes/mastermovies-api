@@ -5,12 +5,9 @@ export const up = (knex: Knex) =>
     // Create model tables
     knex.schema.withSchema("glacier").createTable("film", table => {
       table.increments("id").primary();
-      table
-        .string("name")
-        .unique()
-        .notNullable();
+      table.string("name").notNullable();
       table.boolean("public").notNullable();
-      table.string("description");
+      table.text("description");
       table.dateTime("release");
       table.string("location");
       table.string("copyright");
@@ -22,12 +19,16 @@ export const up = (knex: Knex) =>
         .string("name")
         .unique()
         .notNullable();
-      table.string("description");
+      table.text("description");
     }),
     knex.schema.withSchema("glacier").createTable("key", table => {
       table.increments("id").primary();
-      table.string("value").notNullable();
+      table
+        .string("value")
+        .unique()
+        .notNullable();
       table.dateTime("expiry");
+      table.text("comment");
     }),
     knex.schema.withSchema("glacier").createTable("thumbnail", table => {
       table.increments("id").primary();

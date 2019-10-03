@@ -7,7 +7,7 @@ import { HTTP_CODES } from "../middleware/respond";
 import { AuthRouter } from "../routes/auth";
 import { GlacierRouter } from "../routes/glacier";
 import { ServicesRouter } from "../routes/services";
-import { ApiContext, ApiRouter, ApiState } from "../typings/App";
+import { IApiContext, IApiState, TApiRouter } from "../types/App";
 import { logger } from "./logger";
 
 export const BASE_PATH = "/v2";
@@ -27,10 +27,10 @@ const ENDPOINTS: IPromisedEndpoints = {
 };
 
 // Initialize each endpoint (concurrently)
-export async function createAppRouter(): Promise<ApiRouter> {
+export async function createAppRouter(): Promise<TApiRouter> {
   logger.info({ msg: `[INIT] Preparing ${Object.keys(ENDPOINTS).length} endpoints...` });
 
-  const router = new Router<ApiState, ApiContext>();
+  const router = new Router<IApiState, IApiContext>();
 
   attachMainRoutes(router);
   await attachEndpoints(router);
@@ -38,7 +38,7 @@ export async function createAppRouter(): Promise<ApiRouter> {
   return router;
 }
 
-function attachMainRoutes(router: ApiRouter) {
+function attachMainRoutes(router: TApiRouter) {
   router
     .get("/", async ctx => {
       ctx.redirect(BASE_PATH);
@@ -104,7 +104,7 @@ function ensurePrecedingSlash(path: string): string {
 }
 
 function createServiceUnavailable() {
-  return new Router<ApiState, ApiContext>().all("*", async ctx => {
+  return new Router<IApiState, IApiContext>().all("*", async ctx => {
     ctx.standard(HTTP_CODES.SERVICE_UNAVAILABLE);
   });
 }
