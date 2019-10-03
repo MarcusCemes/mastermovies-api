@@ -11,9 +11,10 @@ const HASH_ALGORITHM = "blake2b512";
 const SECRET_BYTES = 12;
 const TOKEN_BYTES = 12;
 
-export const SECRET_COOKIE = "CSRF-Secret";
-export const TOKEN_COOKIE = "CSRF-Token";
-export const TOKEN_HEADER = "CSRF-Token";
+const SECRET_COOKIE = "CSRF-Secret";
+const TOKEN_COOKIE = "CSRF-Token";
+const TOKEN_HEADER = "CSRF-Token";
+const TOKEN_DOMAIN = ".mastermovies.uk";
 
 const BASE64_REGEX = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
 
@@ -87,7 +88,8 @@ async function setNewCsrfPair(ctx: Context) {
       secure: process.env.NODE_ENV === "production",
       httpOnly: false,
       maxAge: 86400000,
-      path: "/"
+      path: "/",
+      domain: TOKEN_DOMAIN
     });
   } catch (err) {
     logger.error({ msg: "Failed to generate CSRF token", err });
