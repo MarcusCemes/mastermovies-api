@@ -12,7 +12,7 @@
     "deepmerge": "^4.0.0",
     "escape-string-regexp": "^2.0.0",
     "jsonwebtoken": "^8.5.1",
-    "knex": "^0.19.4",
+    "knex": "^0.19.5",
     "koa": "^2.8.2",
     "koa-bodyparser": "^4.2.1",
     "koa-helmet": "^5.1.0",
