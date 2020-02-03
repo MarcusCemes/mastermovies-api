@@ -14,7 +14,9 @@ interface IDownloadToken extends IBasicJwtProperties {
   resourceId: number;
 }
 
-/** A secure authorisation function to gain access to Glacier content */
+const EXPIRES_IN: number = 43200;
+
+/** Sign a authorisation token if the session contains a valid film authorisation */
 export async function authoriseDownload(ctx: IApiContext) {
   // Validate the request payload
   const { error, value } = Joi.object()
@@ -45,11 +47,11 @@ export async function authoriseDownload(ctx: IApiContext) {
       authorisation: await signJwt<IDownloadToken>(
         downloadToken,
         Config.get("glacier").auth.download.secret,
-        43200,
+        EXPIRES_IN,
         session.jti
       )
     });
   } else {
-    ctx.standard(HTTP_CODES.UNAUTHORIZED);
+    ctx.standard(HTTP_CODES.FORBIDDEN);
   }
 }

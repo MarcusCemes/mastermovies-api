@@ -76,7 +76,7 @@ export async function authoriseFilm(ctx: IApiContext) {
     // tslint:disable-next-line:no-floating-promises
     logView(value.resourceId);
   } else if (authResult === AUTH_RESULT.EXPIRED) {
-    ctx.standard(HTTP_CODES.UNAUTHORIZED, "Authorisation expired");
+    ctx.standard(HTTP_CODES.FORBIDDEN, "Authorisation expired");
   } else {
     ctx.standard(HTTP_CODES.UNAUTHORIZED, "Authorisation rejected");
   }
