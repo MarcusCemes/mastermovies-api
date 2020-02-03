@@ -20,6 +20,11 @@ const AUTH_REQUIRED: { [key in EType]: boolean } = {
   [EType.THUMBNAIL]: false
 };
 
+const CACHE_DURATION: { [key in EType]: number } = {
+  [EType.EXPORT]: 0,
+  [EType.THUMBNAIL]: 600
+};
+
 /** Serve binary streaming of Thumbnail and Export resources */
 export async function stream(ctx: IApiContext, type: EType) {
   // Validate the request and generate basic info
@@ -43,6 +48,7 @@ export async function stream(ctx: IApiContext, type: EType) {
 
   // Generate path and stream it!
   const path = generatePath(type, id, filmId);
+  applyCacheDuration(ctx, type);
   const shouldDownload = typeof ctx.query.download !== "undefined";
 
   return streamFile(ctx, path, mime, shouldDownload ? filename : void 0);
@@ -110,9 +116,9 @@ async function getTypeMeta(
         .findById(id)
         .select("mime", "film_id as filmId")
         .first() as unknown) as { mime?: string; filmId: number };
+    default:
+      return null;
   }
-
-  return null;
 }
 
 /** Generate the content path on disk */
@@ -124,13 +130,18 @@ function generatePath(type: EType, id: number, filmId: number): string {
       return join(ROOT, "exports", id.toString());
     case EType.THUMBNAIL:
       return join(ROOT, "thumbs", id.toString());
+    default:
+      logger.error({
+        msg: "Failed to generate path",
+        filmId,
+        id,
+        type
+      });
+      throw new Error("Failed to generate glacier content path");
   }
+}
 
-  logger.error({
-    msg: "Failed to generate path",
-    filmId,
-    id,
-    type
-  });
-  throw new Error("Failed to generate glacier content path");
+/** Generate the content path on disk */
+function applyCacheDuration(ctx: IApiContext, type: EType): void {
+  if (typeof CACHE_DURATION[type] !== "undefined") ctx.cache = CACHE_DURATION[type];
 }
