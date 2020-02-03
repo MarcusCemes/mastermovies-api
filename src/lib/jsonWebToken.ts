@@ -1,10 +1,10 @@
-import { sign, verify } from "jsonwebtoken";
+import { Algorithm, sign, verify } from "jsonwebtoken";
 
 import { IBasicJwtProperties } from "../types/App";
 
 // Supported algorithms. The first index will be used for signing.
-const ALGORITHMS = ["HS256"];
-const AUDIENCE = "mastermovies";
+const ALGORITHMS: Algorithm[] = ["HS256"];
+const AUDIENCE: string = "mastermovies";
 
 /**
  * Low level function to verify a JWT using HMAC
