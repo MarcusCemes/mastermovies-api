@@ -50,10 +50,10 @@ export class Film extends Model {
           from: `${Film.tableName}.id`,
           through: {
             from: `${Film.schemaName}.film_keys.film_id`,
-            to: `${Film.schemaName}.film_keys.key_id`
+            to: `${Film.schemaName}.film_keys.key_id`,
           },
-          to: `${Key.tableName}.id`
-        }
+          to: `${Key.tableName}.id`,
+        },
       },
 
       groups: {
@@ -63,10 +63,10 @@ export class Film extends Model {
           from: `${Film.tableName}.id`,
           through: {
             from: `${Group.schemaName}.group_films.film_id`,
-            to: `${Group.schemaName}.group_films.group_id`
+            to: `${Group.schemaName}.group_films.group_id`,
           },
-          to: `${Group.tableName}.id`
-        }
+          to: `${Group.tableName}.id`,
+        },
       },
 
       thumbnails: {
@@ -74,8 +74,8 @@ export class Film extends Model {
         modelClass: Thumbnail,
         join: {
           from: `${Film.tableName}.id`,
-          to: `${Thumbnail.tableName}.film_id`
-        }
+          to: `${Thumbnail.tableName}.film_id`,
+        },
       },
 
       exports: {
@@ -83,9 +83,9 @@ export class Film extends Model {
         modelClass: Export,
         join: {
           from: `${Film.tableName}.id`,
-          to: `${Export.tableName}.film_id`
-        }
-      }
+          to: `${Export.tableName}.film_id`,
+        },
+      },
     };
 
     return mappings;

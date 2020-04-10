@@ -19,7 +19,7 @@ export const GlacierConfig: Schema<IGlacierConfig> = {
     doc: "The filesystem path to the Glacier Content directory",
     format: String,
     default: "/var/glacier",
-    env: "GLACIER_PATH"
+    env: "GLACIER_PATH",
   },
   auth: {
     film: {
@@ -27,8 +27,8 @@ export const GlacierConfig: Schema<IGlacierConfig> = {
         doc: "How long a film authorisation should last (seconds)",
         format: Number,
         default: 86400,
-        env: "GLACIER_AUTH_FILM_LIFETIME"
-      }
+        env: "GLACIER_AUTH_FILM_LIFETIME",
+      },
     },
     download: {
       secret: {
@@ -36,14 +36,14 @@ export const GlacierConfig: Schema<IGlacierConfig> = {
         format: "buffer64",
         default: randomBytes(64),
         env: "GLACIER_AUTH_DOWNLOAD_SECRET",
-        sensitive: true
+        sensitive: true,
       },
       lifetime: {
         doc: "How long a download authorisation should last (seconds)",
         format: Number,
         default: 43200,
-        env: "GLACIER_AUTH_DOWNLOAD_LIFETIME"
-      }
-    }
-  }
+        env: "GLACIER_AUTH_DOWNLOAD_LIFETIME",
+      },
+    },
+  },
 };

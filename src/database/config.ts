@@ -12,22 +12,22 @@ export function getKnexOptions(): { development: Config; production: Config } {
     connection: {
       host,
       user,
-      password
+      password,
     },
     pool: {
       min: 2,
-      max: poolMax
+      max: poolMax,
     },
     migrations: {
       directory: "build/database/migrations",
       tableName: "glacier_knex_migrations",
-      loadExtensions: [".js"]
+      loadExtensions: [".js"],
     },
     seeds: {
       directory: "build/database/seeds",
       // @ts-ignore
-      loadExtensions: [".js"]
-    }
+      loadExtensions: [".js"],
+    },
   };
 
   return {
@@ -35,16 +35,16 @@ export function getKnexOptions(): { development: Config; production: Config } {
       ...baseOptions,
       connection: {
         ...(baseOptions.connection as object),
-        database: developmentDb
-      }
+        database: developmentDb,
+      },
     },
 
     production: {
       ...baseOptions,
       connection: {
         ...(baseOptions.connection as object),
-        database: productionDb
-      }
-    }
+        database: productionDb,
+      },
+    },
   };
 }

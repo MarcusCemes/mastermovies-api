@@ -9,7 +9,7 @@ export function rateLimitMiddleware() {
   const { points, duration } = Config.get("rateLimit");
   const RateLimiter = new RateLimiterMemory({
     duration,
-    points
+    points,
   });
 
   return async (ctx: IApiContext, next: () => Promise<void>) => {
@@ -19,7 +19,7 @@ export function rateLimitMiddleware() {
       ctx.set({
         "X-RateLimit-Limit": "300",
         "X-RateLimit-Remaining": result.remainingPoints.toString(),
-        "X-RateLimit-Reset": Math.round((Date.now() + result.msBeforeNext) / 1000).toString()
+        "X-RateLimit-Reset": Math.round((Date.now() + result.msBeforeNext) / 1000).toString(),
       });
     } catch (err) {
       ctx.standard(HTTP_CODES.TOO_MANY_REQUESTS, "You have exceeded your API quota!");
@@ -27,7 +27,7 @@ export function rateLimitMiddleware() {
         ctx.set({
           "X-RateLimit-Limit": "300",
           "X-RateLimit-Remaining": err.remainingPoints.toString(),
-          "X-RateLimit-Reset": Math.round((Date.now() + err.msBeforeNext) / 1000).toString()
+          "X-RateLimit-Reset": Math.round((Date.now() + err.msBeforeNext) / 1000).toString(),
         });
       }
       return;

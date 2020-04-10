@@ -17,14 +17,14 @@ function bufferDecoder(value: string) {
 export const ConfigFormats: { [index: string]: Format } = {
   buffer32: {
     coerce: bufferDecoder,
-    validate: buffer => bufferValidator(buffer, 32)
+    validate: (buffer) => bufferValidator(buffer, 32),
   },
   buffer64: {
     coerce: bufferDecoder,
-    validate: buffer => bufferValidator(buffer, 64)
+    validate: (buffer) => bufferValidator(buffer, 64),
   },
   positiveInt: {
-    coerce: number => parseInt(number, 10),
-    validate: x => !isNaN(Number(x)) && x > 0 && x === Math.round(x)
-  }
+    coerce: (number) => parseInt(number, 10),
+    validate: (x) => !isNaN(Number(x)) && x > 0 && x === Math.round(x),
+  },
 };

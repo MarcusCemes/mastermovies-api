@@ -11,7 +11,7 @@ export enum HTTP_CODES {
   TOO_MANY_REQUESTS = 429,
   INTERNAL_SERVER_ERROR = 500,
   NOT_IMPLEMENTED = 501,
-  SERVICE_UNAVAILABLE = 503
+  SERVICE_UNAVAILABLE = 503,
 }
 
 /** Injects ctx with a JSON status response */
@@ -24,7 +24,7 @@ export function respondMiddleware() {
         code,
         status: STATUS_CODES[code] || "<unknown code>",
         message,
-        ...additional
+        ...additional,
       };
     };
 

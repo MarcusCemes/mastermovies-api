@@ -31,16 +31,16 @@ export class LogAuth extends Model {
       modelClass: Film,
       join: {
         from: `${LogAuth.tableName}.film_id`,
-        to: `${Film.tableName}.id`
-      }
+        to: `${Film.tableName}.id`,
+      },
     },
     key: {
       relation: Model.BelongsToOneRelation,
       modelClass: Key,
       join: {
         from: `${LogAuth.tableName}.key_id`,
-        to: `${Key.tableName}.id`
-      }
-    }
+        to: `${Key.tableName}.id`,
+      },
+    },
   };
 }

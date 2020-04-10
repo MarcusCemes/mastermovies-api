@@ -13,7 +13,7 @@ export function corsMiddleware() {
       "Access-Control-Allow-Headers": "Authorization, CSRF-Token, Content-Type",
       "Access-Control-Expose-Headers": "X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset",
       "Access-Control-Allow-Credentials": "true",
-      "Access-Control-Allow-Origin": origin || "*"
+      "Access-Control-Allow-Origin": origin || "*",
     });
 
     await next();

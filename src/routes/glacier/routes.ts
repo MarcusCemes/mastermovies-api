@@ -21,6 +21,6 @@ export function attachGlacierRoutes(router: TApiRouter) {
     .post("/authorise", authorise)
 
     // Binary streaming
-    .get("/stream/export/:id", ctx => stream(ctx, EType.EXPORT))
-    .get("/stream/thumbnail/:id", ctx => stream(ctx, EType.THUMBNAIL));
+    .get("/stream/export/:id", (ctx) => stream(ctx, EType.EXPORT))
+    .get("/stream/thumbnail/:id", (ctx) => stream(ctx, EType.THUMBNAIL));
 }

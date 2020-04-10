@@ -20,13 +20,13 @@ interface IFilmAuthRequest {
 // Relaxed rate-limiting for ALL authorisation attempts
 export const generalAuthLimiter = new RateLimiterMemory({
   duration: 60,
-  points: 60
+  points: 60,
 });
 
 // Strict rate-limiting for failed authorisation attempts
 export const badAuthLimiter = new RateLimiterMemory({
   duration: 600,
-  points: 10
+  points: 10,
 });
 
 /** A secure authorisation function to gain access to Glacier content */
@@ -35,14 +35,14 @@ export async function authoriseFilm(ctx: IApiContext) {
   const { error, value } = Joi.object()
     .keys({
       resourceId: Joi.number().required(),
-      key: Joi.string()
+      key: Joi.string(),
     })
     .unknown(true)
     .validate<IFilmAuthRequest>(ctx.request.body);
 
   if (error) {
     ctx.standard(HTTP_CODES.BAD_REQUEST, void 0, {
-      error: error.message
+      error: error.message,
     });
     return;
   }
@@ -67,9 +67,9 @@ export async function authoriseFilm(ctx: IApiContext) {
     const newAuthorisation: IApiSession = {
       glacier: {
         auth: {
-          [value.resourceId]: getEpoch() + Config.get("glacier").auth.film.lifetime
-        }
-      }
+          [value.resourceId]: getEpoch() + Config.get("glacier").auth.film.lifetime,
+        },
+      },
     };
     ctx.session.set(merge(ctx.session.get(), newAuthorisation));
 
@@ -90,15 +90,13 @@ enum AUTH_RESULT {
   OK,
   REJECTED,
   EXPIRED,
-  NO_RESOURCE
+  NO_RESOURCE,
 }
 
 /** Check with database if key is valid for the given film */
 async function checkAuthorisation(film: number, key: string): Promise<AUTH_RESULT> {
   // Check whether the film access is public
-  const resolvedFilm: Film = await Film.query()
-    .select(`${Film.tableName}.public`)
-    .findById(film);
+  const resolvedFilm: Film = await Film.query().select(`${Film.tableName}.public`).findById(film);
 
   if (!resolvedFilm) return AUTH_RESULT.NO_RESOURCE;
   if (resolvedFilm.public === true) return AUTH_RESULT.OK;
@@ -109,7 +107,7 @@ async function checkAuthorisation(film: number, key: string): Promise<AUTH_RESUL
     .select(`${Key.tableName}.expiry`)
     .where(`${Key.tableName}.value`, key)
     .leftJoinRelation("[films, groups.films]")
-    .where(builder => builder.where("films.id", film).orWhere("groups:films.id", film))
+    .where((builder) => builder.where("films.id", film).orWhere("groups:films.id", film))
     .first();
 
   if (resolvedKey) {
@@ -126,22 +124,18 @@ async function checkAuthorisation(film: number, key: string): Promise<AUTH_RESUL
 /** Log the successful/failed authorisation attempt in the database */
 async function logAuthorisation(filmId: number, keyValue: string, ip: string, authResult: AUTH_RESULT) {
   try {
-    const key = !!keyValue
-      ? await Key.query()
-          .select("id")
-          .findOne("value", keyValue)
-      : void 0;
+    const key = !!keyValue ? await Key.query().select("id").findOne("value", keyValue) : void 0;
     await LogAuth.query()
       .insertGraph(
         {
           success: authResult === AUTH_RESULT.OK,
           ip,
           film: {
-            id: filmId
+            id: filmId,
           },
-          key
+          key,
         },
-        { relate: true }
+        { relate: true },
       )
       .skipUndefined();
   } catch (err) {

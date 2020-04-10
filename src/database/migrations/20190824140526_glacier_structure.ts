@@ -3,7 +3,7 @@ import Knex from "knex";
 export const up = (knex: Knex) =>
   Promise.all([
     // Create model tables
-    knex.schema.withSchema("glacier").createTable("film", table => {
+    knex.schema.withSchema("glacier").createTable("film", (table) => {
       table.increments("id").primary();
       table.string("name").notNullable();
       table.boolean("public").notNullable();
@@ -13,43 +13,27 @@ export const up = (knex: Knex) =>
       table.string("copyright");
       table.json("crew");
     }),
-    knex.schema.withSchema("glacier").createTable("group", table => {
+    knex.schema.withSchema("glacier").createTable("group", (table) => {
       table.increments("id").primary();
-      table
-        .string("name")
-        .unique()
-        .notNullable();
+      table.string("name").unique().notNullable();
       table.text("description");
     }),
-    knex.schema.withSchema("glacier").createTable("key", table => {
+    knex.schema.withSchema("glacier").createTable("key", (table) => {
       table.increments("id").primary();
-      table
-        .string("value")
-        .unique()
-        .notNullable();
+      table.string("value").unique().notNullable();
       table.dateTime("expiry");
       table.text("comment");
     }),
-    knex.schema.withSchema("glacier").createTable("thumbnail", table => {
+    knex.schema.withSchema("glacier").createTable("thumbnail", (table) => {
       table.increments("id").primary();
-      table
-        .integer("film_id")
-        .notNullable()
-        .unsigned()
-        .references("id")
-        .inTable("glacier.film");
+      table.integer("film_id").notNullable().unsigned().references("id").inTable("glacier.film");
       table.integer("width").unsigned();
       table.integer("height").unsigned();
       table.string("mime");
     }),
-    knex.schema.withSchema("glacier").createTable("export", table => {
+    knex.schema.withSchema("glacier").createTable("export", (table) => {
       table.increments("id").primary();
-      table
-        .integer("film_id")
-        .notNullable()
-        .unsigned()
-        .references("id")
-        .inTable("glacier.film");
+      table.integer("film_id").notNullable().unsigned().references("id").inTable("glacier.film");
       table.string("filename").notNullable();
       table.integer("width").unsigned();
       table.integer("height").unsigned();
@@ -61,56 +45,26 @@ export const up = (knex: Knex) =>
     }),
 
     // Create Many-To-Many relationship tables
-    knex.schema.withSchema("glacier").createTable("group_films", table => {
-      table
-        .integer("group_id")
-        .notNullable()
-        .unsigned()
-        .references("id")
-        .inTable("glacier.group");
-      table
-        .integer("film_id")
-        .notNullable()
-        .unsigned()
-        .references("id")
-        .inTable("glacier.film");
+    knex.schema.withSchema("glacier").createTable("group_films", (table) => {
+      table.integer("group_id").notNullable().unsigned().references("id").inTable("glacier.group");
+      table.integer("film_id").notNullable().unsigned().references("id").inTable("glacier.film");
       table.primary(["group_id", "film_id"]);
     }),
-    knex.schema.withSchema("glacier").createTable("group_keys", table => {
-      table
-        .integer("group_id")
-        .notNullable()
-        .unsigned()
-        .references("id")
-        .inTable("glacier.group");
-      table
-        .integer("key_id")
-        .notNullable()
-        .unsigned()
-        .references("id")
-        .inTable("glacier.key");
+    knex.schema.withSchema("glacier").createTable("group_keys", (table) => {
+      table.integer("group_id").notNullable().unsigned().references("id").inTable("glacier.group");
+      table.integer("key_id").notNullable().unsigned().references("id").inTable("glacier.key");
       table.primary(["group_id", "key_id"]);
     }),
-    knex.schema.withSchema("glacier").createTable("film_keys", table => {
-      table
-        .integer("film_id")
-        .notNullable()
-        .unsigned()
-        .references("id")
-        .inTable("glacier.film");
-      table
-        .integer("key_id")
-        .notNullable()
-        .unsigned()
-        .references("id")
-        .inTable("glacier.key");
+    knex.schema.withSchema("glacier").createTable("film_keys", (table) => {
+      table.integer("film_id").notNullable().unsigned().references("id").inTable("glacier.film");
+      table.integer("key_id").notNullable().unsigned().references("id").inTable("glacier.key");
       table.primary(["film_id", "key_id"]);
-    })
+    }),
   ]);
 
 export const down = (knex: Knex) =>
   Promise.all(
-    ["film", "group", "key", "thumbnail", "export", "group_films", "group_keys", "film_keys"].map(v =>
-      knex.schema.raw(`DROP TABLE glacier.${v} CASCADE;`)
-    )
+    ["film", "group", "key", "thumbnail", "export", "group_films", "group_keys", "film_keys"].map((v) =>
+      knex.schema.raw(`DROP TABLE glacier.${v} CASCADE;`),
+    ),
   );

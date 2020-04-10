@@ -37,7 +37,7 @@ export function signJwt<T extends IBasicJwtProperties>(
   payload: T,
   secret: Buffer,
   expiresIn: number,
-  jwtid?: string
+  jwtid?: string,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const { exp, aud, jti, ...cleanPayload } = payload; // remove old metadata, causes errors
@@ -48,7 +48,7 @@ export function signJwt<T extends IBasicJwtProperties>(
         algorithm: ALGORITHMS[0],
         audience: AUDIENCE,
         expiresIn,
-        jwtid
+        jwtid,
       },
       (err, signed) => {
         if (err) {
@@ -56,7 +56,7 @@ export function signJwt<T extends IBasicJwtProperties>(
         } else {
           resolve(signed);
         }
-      }
+      },
     );
   });
 }

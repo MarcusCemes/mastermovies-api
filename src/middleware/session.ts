@@ -14,7 +14,7 @@ const COOKIE_OPTIONS = {
   overwrite: true,
   maxAge: Math.floor(Config.get("auth").jwt.lifetime * 1000),
   httpOnly: true,
-  secure: Config.get("env") === "production"
+  secure: Config.get("env") === "production",
 };
 
 const BASE64_REGEX = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
@@ -34,7 +34,7 @@ export function sessionMiddleware() {
       set: (newSession: IApiSession) => {
         session = deepFreeze(newSession);
         modified = true;
-      }
+      },
     };
 
     await next();
@@ -59,10 +59,7 @@ function getSession(ctx: IApiContext): IApiSession {
   if (!jtiSecret) return {};
 
   const jtiHash = BASE64_REGEX.test(jtiSecret)
-    ? createHash(HASH_ALGORITHM)
-        .update(Buffer.from(jtiSecret, "base64"))
-        .digest()
-        .toString("base64", 0, JTI_HASH_BYTES)
+    ? createHash(HASH_ALGORITHM).update(Buffer.from(jtiSecret, "base64")).digest().toString("base64", 0, JTI_HASH_BYTES)
     : null;
 
   // Extract bearer token
@@ -89,10 +86,7 @@ async function setSession(ctx: IApiContext, session: IApiSession) {
 
   // Generate a unique ID and hash
   const jtiSecret = (await randomBytesAsync(JTI_SECRET_BYTES)).slice(0, JTI_SECRET_BYTES);
-  const jtiHash = createHash(HASH_ALGORITHM)
-    .update(jtiSecret)
-    .digest()
-    .toString("base64", 0, JTI_HASH_BYTES);
+  const jtiHash = createHash(HASH_ALGORITHM).update(jtiSecret).digest().toString("base64", 0, JTI_HASH_BYTES);
 
   const signedSession = await signJwt(session, secret, lifetime, jtiHash);
 
@@ -101,7 +95,7 @@ async function setSession(ctx: IApiContext, session: IApiSession) {
     ctx.body.token = signedSession;
   } else {
     ctx.body = {
-      token: signedSession
+      token: signedSession,
     };
   }
 
@@ -111,7 +105,7 @@ async function setSession(ctx: IApiContext, session: IApiSession) {
   // Save an archived JWT for future retrieval
   ctx.cookies.set(archiveCookie, signedSession, {
     ...COOKIE_OPTIONS,
-    path: "/v2/auth/"
+    path: "/v2/auth/",
   });
 }
 
@@ -125,7 +119,7 @@ function destroySession(ctx: IApiContext): void {
     ctx.body.token = null;
   } else {
     ctx.body = {
-      token: null
+      token: null,
     };
   }
 }
@@ -136,7 +130,7 @@ function deepFreeze<T extends object>(object: T): T {
 
   Object.freeze(object);
 
-  Object.getOwnPropertyNames(object).forEach(prop => {
+  Object.getOwnPropertyNames(object).forEach((prop) => {
     if (
       object.hasOwnProperty(prop) &&
       object[prop] !== null &&

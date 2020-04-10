@@ -12,17 +12,17 @@ import { streamFile } from "../lib/streamFile";
 /** Supported resource types */
 export const enum EType {
   EXPORT = 0,
-  THUMBNAIL = 1
+  THUMBNAIL = 1,
 }
 
 const AUTH_REQUIRED: { [key in EType]: boolean } = {
   [EType.EXPORT]: true,
-  [EType.THUMBNAIL]: false
+  [EType.THUMBNAIL]: false,
 };
 
 const CACHE_DURATION: { [key in EType]: number } = {
   [EType.EXPORT]: 0,
-  [EType.THUMBNAIL]: 600
+  [EType.THUMBNAIL]: 600,
 };
 
 /** Serve binary streaming of Thumbnail and Export resources */
@@ -66,7 +66,7 @@ function validateRequest(ctx: IApiContext, type: EType): { authRequired: boolean
 
   return {
     id: parseInt(ctx.params.id, 10),
-    authRequired
+    authRequired,
   };
 }
 
@@ -98,7 +98,7 @@ async function verifyAuth(ctx: IApiContext, type: EType, filmId: number): Promis
 /** Retrieve some metadata from the database */
 async function getTypeMeta(
   type: EType,
-  id: number
+  id: number,
 ): Promise<{
   filmId: number;
   mime?: string;
@@ -106,16 +106,17 @@ async function getTypeMeta(
 } | null> {
   switch (type) {
     case EType.EXPORT:
-      return (Export.query()
-        .findById(id)
-        .select("filename", "mime", "film_id as filmId")
-        .first() as unknown) as { filename: string; mime: string; filmId: number };
+      return (Export.query().findById(id).select("filename", "mime", "film_id as filmId").first() as unknown) as {
+        filename: string;
+        mime: string;
+        filmId: number;
+      };
 
     case EType.THUMBNAIL:
-      return (Thumbnail.query()
-        .findById(id)
-        .select("mime", "film_id as filmId")
-        .first() as unknown) as { mime?: string; filmId: number };
+      return (Thumbnail.query().findById(id).select("mime", "film_id as filmId").first() as unknown) as {
+        mime?: string;
+        filmId: number;
+      };
     default:
       return null;
   }
@@ -135,7 +136,7 @@ function generatePath(type: EType, id: number, filmId: number): string {
         msg: "Failed to generate path",
         filmId,
         id,
-        type
+        type,
       });
       throw new Error("Failed to generate glacier content path");
   }

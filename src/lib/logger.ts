@@ -1,7 +1,7 @@
 import pino, { LoggerOptions } from "pino";
 
 const options: LoggerOptions = {
-  level: process.env.NODE_ENV === "production" ? "info" : "trace"
+  level: process.env.NODE_ENV === "production" ? "info" : "trace",
 };
 
 /** Simple JSON logger */

@@ -24,8 +24,8 @@ export async function createApp(): Promise<TApiApp> {
   app.use(appRouter.routes());
   app.use(
     appRouter.allowedMethods({
-      throw: true // caught by the error handler
-    })
+      throw: true, // caught by the error handler
+    }),
   );
 
   return app;

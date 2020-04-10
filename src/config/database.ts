@@ -15,43 +15,43 @@ export const DatabaseConfig: Schema<IDatabaseConfig> = {
     doc: "The hostname of the Postgres server",
     format: String,
     default: "127.0.0.1",
-    env: "DATABASE_HOST"
+    env: "DATABASE_HOST",
   },
   port: {
     doc: "THe port of the Postgres server",
     format: "port",
     default: 5432,
-    env: "DATABASE_PORT"
+    env: "DATABASE_PORT",
   },
   user: {
     doc: "The username to use when connecting to Postgres",
     format: String,
     default: "node",
-    env: "DATABASE_USER"
+    env: "DATABASE_USER",
   },
   password: {
     doc: "The password to use when connecting to Postgres",
     format: String,
     default: "",
     env: "DATABASE_PASSWORD",
-    sensitive: true
+    sensitive: true,
   },
   productionDb: {
     doc: "The production database to use when connecting to Postgres",
     format: String,
     default: "mastermovies",
-    env: "DATABASE_PRODUCTION_DB"
+    env: "DATABASE_PRODUCTION_DB",
   },
   developmentDb: {
     doc: "The development database to use when connecting to Postgres",
     format: String,
     default: "mastermovies_dev",
-    env: "DATABASE_DEVELOPMENT_DB"
+    env: "DATABASE_DEVELOPMENT_DB",
   },
   poolMax: {
     doc: "The maximum connection pool size",
     format: Number,
     default: 16,
-    env: "DATABASE_POOL_MAX"
-  }
+    env: "DATABASE_POOL_MAX",
+  },
 };

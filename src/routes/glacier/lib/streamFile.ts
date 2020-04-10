@@ -14,7 +14,7 @@ export async function streamFile(ctx: IApiContext, path: string, mime: string | 
     logger.error({
       message: "[GLACIER] Glacier content path was not considered safe!",
       rootDir: ROOT,
-      contentPath: path
+      contentPath: path,
     });
     throw new Error("Unsafe glacier content path");
   }
@@ -40,6 +40,6 @@ export async function streamFile(ctx: IApiContext, path: string, mime: string | 
     cacheControl: false,
     index: false,
     dotfiles: "deny",
-    lastModified: false
+    lastModified: false,
   });
 }

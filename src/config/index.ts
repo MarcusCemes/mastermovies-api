@@ -13,7 +13,7 @@ const EnvConfig: SchemaObj<"production" | "development"> = {
   doc: "The application environment",
   format: ["production", "development"],
   default: "development",
-  env: "NODE_ENV"
+  env: "NODE_ENV",
 };
 
 // Modular application configuration
@@ -24,7 +24,7 @@ const config = {
   glacier: GlacierConfig,
   rateLimit: RateLimitConfig,
   server: ServerConfig,
-  services: ServicesConfig
+  services: ServicesConfig,
 };
 
 // Add custom formats

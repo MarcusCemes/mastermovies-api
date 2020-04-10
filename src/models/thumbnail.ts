@@ -30,9 +30,9 @@ export class Thumbnail extends Model {
         modelClass: Film,
         join: {
           from: `${Thumbnail.tableName}.film_id`,
-          to: `${Film.tableName}.id`
-        }
-      }
+          to: `${Film.tableName}.id`,
+        },
+      },
     };
     return mappings;
   }

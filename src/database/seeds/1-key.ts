@@ -6,7 +6,5 @@ const data: IKey[] = [{ value: "Sea" }, { value: "Storm" }, { value: "Boats", ex
 
 export async function seed(knex: Knex) {
   await knex.raw(`TRUNCATE ${Key.tableName} RESTART IDENTITY CASCADE;`);
-  await Key.bindKnex(knex)
-    .query()
-    .insert(data);
+  await Key.bindKnex(knex).query().insert(data);
 }

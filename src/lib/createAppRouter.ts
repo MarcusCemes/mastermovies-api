@@ -23,7 +23,7 @@ interface IEndpoints {
 const ENDPOINTS: IPromisedEndpoints = {
   auth: AuthRouter,
   services: ServicesRouter,
-  glacier: GlacierRouter
+  glacier: GlacierRouter,
 };
 
 // Initialize each endpoint (concurrently)
@@ -40,16 +40,16 @@ export async function createAppRouter(): Promise<TApiRouter> {
 
 function attachMainRoutes(router: TApiRouter) {
   router
-    .get("/", async ctx => {
+    .get("/", async (ctx) => {
       ctx.redirect(BASE_PATH);
     })
-    .get(BASE_PATH, async ctx => {
+    .get(BASE_PATH, async (ctx) => {
       ctx.body = {
         message: "MasterMovies API",
-        status: "active"
+        status: "active",
       };
     })
-    .get(BASE_PATH + "/openapi.json", async ctx => {
+    .get(BASE_PATH + "/openapi.json", async (ctx) => {
       // TODO seperate into different file
       ctx.cache = 3600;
       ctx.body = createReadStream(join(__dirname, "../../assets/openapi.json")).pipe(new PassThrough());
@@ -65,7 +65,7 @@ async function attachEndpoints(router: Router) {
 
   for (const [path, endpoint] of Object.entries(ENDPOINTS)) {
     termination.push(
-      new Promise(async resolve => {
+      new Promise(async (resolve) => {
         try {
           const resolvedEndpoint = await endpoint();
           if (resolvedEndpoint === null) throw new Error("Null router returned");
@@ -77,7 +77,7 @@ async function attachEndpoints(router: Router) {
           logger.error({ msg: `[INIT] Endpoint '${path}' failed to start`, err });
         }
         resolve();
-      })
+      }),
     );
   }
 
@@ -104,7 +104,7 @@ function ensurePrecedingSlash(path: string): string {
 }
 
 function createServiceUnavailable() {
-  return new Router<IApiState, IApiContext>().all("*", async ctx => {
+  return new Router<IApiState, IApiContext>().all("*", async (ctx) => {
     ctx.standard(HTTP_CODES.SERVICE_UNAVAILABLE);
   });
 }

@@ -7,7 +7,7 @@ import { authoriseFilm } from "./film";
 
 const AUTH_TYPES: { [index: string]: (ctx: IApiContext) => Promise<void> } = {
   film: authoriseFilm,
-  download: authoriseDownload
+  download: authoriseDownload,
 };
 
 interface IAuthRequest {
@@ -20,14 +20,14 @@ export async function authorise(ctx: IApiContext) {
   // Validate the request payload
   const { error, value } = Joi.object()
     .keys({
-      type: Joi.string().required()
+      type: Joi.string().required(),
     })
     .unknown(true)
     .validate<IAuthRequest>(ctx.request.body);
 
   if (error) {
     ctx.standard(HTTP_CODES.BAD_REQUEST, void 0, {
-      error: error.message
+      error: error.message,
     });
     return;
   }

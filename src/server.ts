@@ -34,7 +34,7 @@ function warnEnvironment(env: string) {
 
 /** Handle graceful shutdown */
 function registerShutdownHook(server: StoppableServer) {
-  exitHook(async resolve => {
+  exitHook(async (resolve: () => {}) => {
     logger.info("[SHUTDOWN] Waiting for server to close");
     await server.stop();
     logger.info("[SHUTDOWN] Waiting for database to close");

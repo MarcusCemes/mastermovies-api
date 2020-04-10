@@ -24,7 +24,7 @@ const MIDDLEWARE = [
   bodyParser,
   csrfMiddleware,
   sessionMiddleware,
-  databaseMiddleware
+  databaseMiddleware,
 ];
 
 export function registerMiddleware(app: TApiApp) {

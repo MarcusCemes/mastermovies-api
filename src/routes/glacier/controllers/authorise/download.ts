@@ -21,14 +21,14 @@ export async function authoriseDownload(ctx: IApiContext) {
   // Validate the request payload
   const { error, value } = Joi.object()
     .keys({
-      resourceId: Joi.number().required()
+      resourceId: Joi.number().required(),
     })
     .unknown(true)
     .validate<IDownloadAuthRequest>(ctx.request.body);
 
   if (error) {
     ctx.standard(HTTP_CODES.BAD_REQUEST, void 0, {
-      error: error.message
+      error: error.message,
     });
     return;
   }
@@ -48,8 +48,8 @@ export async function authoriseDownload(ctx: IApiContext) {
         downloadToken,
         Config.get("glacier").auth.download.secret,
         EXPIRES_IN,
-        session.jti
-      )
+        session.jti,
+      ),
     });
   } else {
     ctx.standard(HTTP_CODES.FORBIDDEN);

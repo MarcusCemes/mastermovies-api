@@ -12,9 +12,7 @@ export async function getFilm(ctx: IApiContext) {
   }
 
   // Load the film from the database
-  const film = await Film.query()
-    .findById(ctx.params.id)
-    .eager("[thumbnails, exports]");
+  const film = await Film.query().findById(ctx.params.id).eager("[thumbnails, exports]");
   if (film) {
     ctx.body = { data: film };
   } else {

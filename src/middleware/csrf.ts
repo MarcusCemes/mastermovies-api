@@ -42,10 +42,7 @@ export function csrfMiddleware() {
         const rawToken = Buffer.from(tokenHeader, "base64");
         const rawSecret = Buffer.from(secret, "base64");
 
-        const expectedToken = createHash(HASH_ALGORITHM)
-          .update(Buffer.from(rawSecret))
-          .digest()
-          .slice(TOKEN_BYTES);
+        const expectedToken = createHash(HASH_ALGORITHM).update(Buffer.from(rawSecret)).digest().slice(TOKEN_BYTES);
         if (Buffer.compare(rawToken, expectedToken)) {
           csrfAuthorised = true;
         }
@@ -70,17 +67,14 @@ const randomBytesAsync = promisify(randomBytes);
 async function setNewCsrfPair(ctx: Context) {
   try {
     const rawSecret = await randomBytesAsync(SECRET_BYTES);
-    const token = createHash(HASH_ALGORITHM)
-      .update(rawSecret)
-      .digest()
-      .toString("base64", 0, TOKEN_BYTES);
+    const token = createHash(HASH_ALGORITHM).update(rawSecret).digest().toString("base64", 0, TOKEN_BYTES);
 
     ctx.cookies.set(SECRET_COOKIE, rawSecret.toString("base64"), {
       overwrite: true,
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       maxAge: 86400000,
-      path: "/"
+      path: "/",
     });
 
     ctx.cookies.set(TOKEN_COOKIE, token, {
@@ -89,7 +83,7 @@ async function setNewCsrfPair(ctx: Context) {
       httpOnly: false,
       maxAge: 86400000,
       path: "/",
-      domain: TOKEN_DOMAIN
+      domain: TOKEN_DOMAIN,
     });
   } catch (err) {
     logger.error({ msg: "Failed to generate CSRF token", err });

@@ -31,10 +31,10 @@ export class Group extends Model {
           from: `${Group.tableName}.id`,
           through: {
             from: `${Group.schemaName}.group_films.group_id`,
-            to: `${Group.schemaName}.group_films.film_id`
+            to: `${Group.schemaName}.group_films.film_id`,
           },
-          to: `${Film.tableName}.id`
-        }
+          to: `${Film.tableName}.id`,
+        },
       },
 
       keys: {
@@ -44,11 +44,11 @@ export class Group extends Model {
           from: `${Group.tableName}.id`,
           through: {
             from: `${Group.schemaName}.group_keys.group_id`,
-            to: `${Group.schemaName}.group_keys.key_id`
+            to: `${Group.schemaName}.group_keys.key_id`,
           },
-          to: `${Key.tableName}.id`
-        }
-      }
+          to: `${Key.tableName}.id`,
+        },
+      },
     };
 
     return mappings;

@@ -42,9 +42,9 @@ export class Export extends Model {
         modelClass: Film,
         join: {
           from: `${Export.tableName}.film_id`,
-          to: `${Film.tableName}.id`
-        }
-      }
+          to: `${Film.tableName}.id`,
+        },
+      },
     };
     return mappings;
   }

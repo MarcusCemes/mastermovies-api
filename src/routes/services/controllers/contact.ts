@@ -19,13 +19,13 @@ const TEMPLATE_PATHS = {
   operator: "emails/contact/operator.hbs",
   operatorText: "emails/contact/operatorText.hbs",
   client: "emails/contact/client.hbs",
-  clientText: "emails/contact/clientText.hbs"
+  clientText: "emails/contact/clientText.hbs",
 };
 
 // Limit the amount of emails that can be sent
 export const contactLimiter = new RateLimiterMemory({
   duration: 600,
-  points: 3
+  points: 3,
 });
 
 const validEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -40,14 +40,14 @@ const transporter = createTransport(
         auth: {
           type: "login",
           user,
-          pass
-        }
+          pass,
+        },
       } as unknown)
     : {
         sendmail: true,
         newline: "unix",
-        path: "/usr/sbin/sendmail"
-      }
+        path: "/usr/sbin/sendmail",
+      },
 );
 
 interface IContactRequest {
@@ -65,13 +65,13 @@ export async function contact(ctx: IApiContext) {
       name: Joi.string(),
       email: Joi.string(),
       subject: Joi.string().required(),
-      message: Joi.string().required()
+      message: Joi.string().required(),
     })
     .validate<IContactRequest>(ctx.request.body);
 
   if (error) {
     ctx.standard(HTTP_CODES.BAD_REQUEST, void 0, {
-      error: error.message
+      error: error.message,
     });
     return;
   }
@@ -111,7 +111,7 @@ async function sendEmails(ctx: IApiContext, name: string, email: string, subject
   // Try to send the operator email
   try {
     const html = inject(await bodyTemplate, {
-      body: inject(await operatorTemplate, { name, email, subject, message })
+      body: inject(await operatorTemplate, { name, email, subject, message }),
     });
     const text = inject(await operatorTextTemplate, { name, email, subject, message });
 
@@ -122,7 +122,7 @@ async function sendEmails(ctx: IApiContext, name: string, email: string, subject
       subject: "🦉 An owl has been spotted!",
       references: `system+${ticket}@mastermovies.uk`,
       html,
-      text
+      text,
     });
   } catch (err) {
     logger.error({ msg: "Failed to send operator email", err: err.message });
@@ -133,7 +133,7 @@ async function sendEmails(ctx: IApiContext, name: string, email: string, subject
   // Try to send the client email
   try {
     const html = inject(await bodyTemplate, {
-      body: inject(await clientTemplate, { name, ticket })
+      body: inject(await clientTemplate, { name, ticket }),
     });
     const text = inject(await clientTextTemplate, { name, ticket });
 
@@ -144,7 +144,7 @@ async function sendEmails(ctx: IApiContext, name: string, email: string, subject
       subject: "🦉 An owl has been spotted!",
       references: `system+${ticket}@mastermovies.uk`,
       html,
-      text
+      text,
     });
   } catch (err) {
     logger.warn({ msg: "Client email failure. Operator email sent", err: err.message });
@@ -152,5 +152,5 @@ async function sendEmails(ctx: IApiContext, name: string, email: string, subject
 }
 
 async function resolveAsset(path: string): Promise<string> {
-  return promises.readFile(join(ASSETS_PATH, path)).then(v => v.toString());
+  return promises.readFile(join(ASSETS_PATH, path)).then((v) => v.toString());
 }

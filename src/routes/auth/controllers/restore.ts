@@ -17,14 +17,11 @@ export async function restore(ctx: IApiContext) {
   const jtiHash =
     jtiSecret &&
     BASE64_REGEX.test(jtiSecret) &&
-    createHash(HASH_ALGORITHM)
-      .update(Buffer.from(jtiSecret, "base64"))
-      .digest()
-      .toString("base64", 0, JTI_HASH_BYTES);
+    createHash(HASH_ALGORITHM).update(Buffer.from(jtiSecret, "base64")).digest().toString("base64", 0, JTI_HASH_BYTES);
 
   const validSession = jtiSecret && verifyJwt(archivedSession, secret, jtiHash);
 
   ctx.body = {
-    token: validSession ? archivedSession : null
+    token: validSession ? archivedSession : null,
   };
 }
