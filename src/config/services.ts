@@ -6,12 +6,8 @@ export interface IServicesConfig {
       operator: string;
       system: string;
     };
-    smtp: {
-      useShell: boolean;
-      host: string;
-      port: number;
-      user: string;
-      password: string;
+    sendgrid: {
+      apiKey: string;
     };
   };
 }
@@ -32,36 +28,12 @@ export const ServicesConfig: Schema<IServicesConfig> = {
         env: "SERVICES_EMAIL_SYSTEM",
       },
     },
-    smtp: {
-      useShell: {
-        doc: "use the `sendmail` shell command over the SMTP protocol",
-        format: Boolean,
-        default: true,
-        env: "SERVICES_SMTP_USE_SHELL",
-      },
-      host: {
-        doc: "If specified, this SMPT host will be used over local sendmail command",
+    sendgrid: {
+      apiKey: {
+        doc: "The API key for the SendGrid service",
         format: String,
         default: "",
-        env: "SERVICES_SMTP_HOST",
-      },
-      port: {
-        doc: "The port for the SMPT server",
-        format: Number,
-        default: 587,
-        env: "SERVICES_SMTP_PORT",
-      },
-      user: {
-        doc: "The username for the SMPT server",
-        format: String,
-        default: "",
-        env: "SERVICES_SMTP_USER",
-      },
-      password: {
-        doc: "The password for the SMPT server",
-        format: String,
-        default: "",
-        env: "SERVICES_SMTP_PASSWORD",
+        env: "SENDGRID_API_KEY",
         sensitive: true,
       },
     },

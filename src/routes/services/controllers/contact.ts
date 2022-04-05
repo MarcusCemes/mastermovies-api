@@ -1,11 +1,10 @@
 import Joi from "@hapi/joi";
+import sendGrid from "@sendgrid/mail";
 import { randomBytes } from "crypto";
 import { promises } from "fs";
-import { createTransport } from "nodemailer";
 import { join, resolve } from "path";
 import { RateLimiterMemory } from "rate-limiter-flexible";
 import { promisify } from "util";
-
 import { Config } from "../../../config";
 import { logger } from "../../../lib/logger";
 import { inject } from "../../../lib/placeholder";
@@ -31,25 +30,8 @@ export const contactLimiter = new RateLimiterMemory({
 const validEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 // Mail transporter
-const { useShell, host, port, user, password: pass } = Config.get("services").email.smtp;
-const transporter = createTransport(
-  !useShell
-    ? ({
-        host,
-        port,
-        auth: {
-          type: "login",
-          user,
-          pass,
-        },
-      } as unknown)
-    : {
-        sendmail: true,
-        newline: "unix",
-        path: "/usr/sbin/sendmail",
-      },
-);
-
+const { apiKey } = Config.get("services").email.sendgrid;
+sendGrid.setApiKey(apiKey);
 interface IContactRequest {
   name?: string;
   email?: string;
@@ -116,11 +98,10 @@ async function sendEmails(ctx: IApiContext, name: string, email: string, subject
     const text = inject(await operatorTextTemplate, { name, email, subject, message });
 
     // Errors will return a HTTP 500, informing the client to try again later
-    await transporter.sendMail({
+    await sendGrid.send({
       to: operator,
       from: system,
       subject: "🦉 An owl has been spotted!",
-      references: `system+${ticket}@mastermovies.uk`,
       html,
       text,
     });
@@ -138,11 +119,10 @@ async function sendEmails(ctx: IApiContext, name: string, email: string, subject
     const text = inject(await clientTextTemplate, { name, ticket });
 
     // Errors will return a HTTP 500, informing the client to try again later
-    await transporter.sendMail({
+    await sendGrid.send({
       to: /^[a-zA-Z\u00C0-\u00FF\s]*$/.test(email) ? `${name} <${email}>` : email,
       from: system,
       subject: "🦉 An owl has been spotted!",
-      references: `system+${ticket}@mastermovies.uk`,
       html,
       text,
     });
