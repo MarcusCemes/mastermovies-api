@@ -9,7 +9,7 @@
     "@koa/router": "^9.4.0",
     "@sendgrid/mail": "^7.6.2",
     "async-exit-hook": "^2.0.1",
-    "convict": "^5.2.0",
+    "convict": "^6.2.3",
     "deepmerge": "^4.2.2",
     "escape-string-regexp": "^3.0.0",
     "jsonwebtoken": "^8.5.1",
