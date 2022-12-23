@@ -12,7 +12,7 @@
     "convict": "^5.2.0",
     "deepmerge": "^4.2.2",
     "escape-string-regexp": "^3.0.0",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "knex": "^0.21.14",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",
