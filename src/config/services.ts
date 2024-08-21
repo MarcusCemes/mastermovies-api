@@ -6,8 +6,9 @@ export interface IServicesConfig {
       operator: string;
       system: string;
     };
-    sendgrid: {
-      apiKey: string;
+    smtp: {
+      host: string;
+      port: number;
     };
   };
 }
@@ -28,13 +29,16 @@ export const ServicesConfig: Schema<IServicesConfig> = {
         env: "SERVICES_EMAIL_SYSTEM",
       },
     },
-    sendgrid: {
-      apiKey: {
-        doc: "The API key for the SendGrid service",
+    smtp: {
+      host: {
         format: String,
-        default: "",
-        env: "SENDGRID_API_KEY",
-        sensitive: true,
+        default: "host.docker.internal",
+        env: "SMTP_HOST",
+      },
+      port: {
+        format: Number,
+        default: 587,
+        env: "SMTP_PORT",
       },
     },
   },

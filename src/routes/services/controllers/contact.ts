@@ -1,5 +1,4 @@
 import Joi from "@hapi/joi";
-import sendGrid from "@sendgrid/mail";
 import { randomBytes } from "crypto";
 import { promises } from "fs";
 import { join, resolve } from "path";
@@ -10,6 +9,7 @@ import { logger } from "../../../lib/logger";
 import { inject } from "../../../lib/placeholder";
 import { HTTP_CODES } from "../../../middleware/respond";
 import { IApiContext } from "../../../types/App";
+import { createTransport } from "nodemailer";
 
 const ASSETS_PATH = resolve(join(__dirname, "../../../../assets"));
 
@@ -30,8 +30,17 @@ export const contactLimiter = new RateLimiterMemory({
 const validEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 // Mail transporter
-const { apiKey } = Config.get("services").email.sendgrid;
-sendGrid.setApiKey(apiKey);
+const { email } = Config.get("services");
+
+const transport = createTransport({
+  host: email.smtp.host,
+  port: email.smtp.port,
+  connectionTimeout: 10,
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
+
 interface IContactRequest {
   name?: string;
   email?: string;
@@ -98,7 +107,7 @@ async function sendEmails(ctx: IApiContext, name: string, email: string, subject
     const text = inject(await operatorTextTemplate, { name, email, subject, message });
 
     // Errors will return a HTTP 500, informing the client to try again later
-    await sendGrid.send({
+    await transport.sendMail({
       to: operator,
       from: system,
       subject: "🦉 An owl has been spotted!",
@@ -112,22 +121,24 @@ async function sendEmails(ctx: IApiContext, name: string, email: string, subject
   }
 
   // Try to send the client email
-  try {
-    const html = inject(await bodyTemplate, {
-      body: inject(await clientTemplate, { name, ticket }),
-    });
-    const text = inject(await clientTextTemplate, { name, ticket });
+  if (email && email !== "undefined") {
+    try {
+      const html = inject(await bodyTemplate, {
+        body: inject(await clientTemplate, { name, ticket }),
+      });
+      const text = inject(await clientTextTemplate, { name, ticket });
 
-    // Errors will return a HTTP 500, informing the client to try again later
-    await sendGrid.send({
-      to: /^[a-zA-Z\u00C0-\u00FF\s]*$/.test(email) ? `${name} <${email}>` : email,
-      from: system,
-      subject: "🦉 An owl has been spotted!",
-      html,
-      text,
-    });
-  } catch (err) {
-    logger.warn({ msg: "Client email failure. Operator email sent", err: err.message });
+      // Errors will return a HTTP 500, informing the client to try again later
+      await transport.sendMail({
+        to: /^[a-zA-Z\u00C0-\u00FF\s]*$/.test(email) ? `${name} <${email}>` : email,
+        from: system,
+        subject: "🦉 An owl has been spotted!",
+        html,
+        text,
+      });
+    } catch (err) {
+      logger.warn({ msg: "Client email failure. Operator email sent", err: err.message });
+    }
   }
 }
 
